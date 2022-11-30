@@ -1,6 +1,5 @@
-*.txt
-*.pdf
 *.tmp
+<<<<<<< develop
 <<<<<<< develop
 <<<<<<< develop
 *.png
@@ -171,3 +170,5 @@ test_callback.log
 =======
 results/
 >>>>>>> Revert "Update .gitignore"
+=======
+>>>>>>> Revert "Revert "Update .gitignore""
