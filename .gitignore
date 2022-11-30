@@ -1,6 +1,5 @@
-*.txt
-*.pdf
 *.tmp
+<<<<<<< develop
 *.png
 *.gif
 /local/
@@ -136,3 +135,5 @@ results/
 
 # tests
 test_callback.log
+=======
+>>>>>>> Update .gitignore
