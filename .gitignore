@@ -1,18 +1,31 @@
+*.txt
+*.pdf
 *.tmp
+<<<<<<< develop
 <<<<<<< develop
 *.png
 *.gif
+=======
+*.png
+>>>>>>> Revert "Update .gitignore"
 /local/
 *.DS_Store
 *.mat
 *.csv
+<<<<<<< develop
 *.hidden
+=======
+>>>>>>> Revert "Update .gitignore"
 
 # don't ignore important .txt and .csv files
 !requirements*
 !LICENSE.txt
 !CMakeLists.txt
+<<<<<<< develop
 !pybamm/CITATIONS.bib
+=======
+!pybamm/CITATIONS.txt
+>>>>>>> Revert "Update .gitignore"
 !pybamm/input/**/*.csv
 !tests/unit/test_parameters/*.csv
 !benchmarks/benchmark_images/*.png
@@ -40,7 +53,11 @@ input/*
 !input/drive_cycles
 
 # keep images required by notebooks
+<<<<<<< develop
 !docs/examples/notebooks/creating_models/SEI.png
+=======
+!examples/notebooks/Creating%20Models/SEI.png
+>>>>>>> Revert "Update .gitignore"
 
 # simulation outputs
 out/
@@ -62,7 +79,14 @@ dist/
 coverage.xml
 htmlcov/
 
+<<<<<<< develop
 # virtual environment
+=======
+# black setup file seems to make Travis CI fail
+pyproject.toml
+
+# virtual enviroment
+>>>>>>> Revert "Update .gitignore"
 env/
 venv/
 venv3.5/
@@ -74,7 +98,10 @@ lib64
 share/
 pyvenv.cfg
 .vscode
+<<<<<<< develop
 .ruff_cache/
+=======
+>>>>>>> Revert "Update .gitignore"
 
 # sundials
 sundials
@@ -112,14 +139,18 @@ test.json
 # tox
 .tox/
 
+<<<<<<< develop
 # nox
 .nox/
 
+=======
+>>>>>>> Revert "Update .gitignore"
 # vcpkg
 vcpkg_installed/
 
 # benchmarks
 html/
+<<<<<<< develop
 results/
 
 # expression tree images for notebooks in docs
@@ -137,3 +168,6 @@ results/
 test_callback.log
 =======
 >>>>>>> Update .gitignore
+=======
+results/
+>>>>>>> Revert "Update .gitignore"
