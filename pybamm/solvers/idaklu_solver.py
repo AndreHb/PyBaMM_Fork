@@ -56,7 +56,7 @@ class IDAKLUSolver(pybamm.BaseSolver):
                 "jacobian": "sparse",
 
                 # name of sundials linear solver to use options are: "SUNLinSol_KLU",
-                # "SUNLinSol_Dense", "SUNLinSol_LapackDense" "SUNLinSol_SPBCGS",
+                # "SUNLinSol_Dense", "SUNLinSol_SPBCGS",
                 # "SUNLinSol_SPFGMR", "SUNLinSol_SPGMR", "SUNLinSol_SPTFQMR",
                 "linear_solver": "SUNLinSol_KLU",
 
@@ -510,7 +510,7 @@ class IDAKLUSolver(pybamm.BaseSolver):
         t_eval : numeric type
             The times at which to compute the solution
         inputs_dict : dict, optional
-            Any external variables or input parameters to pass to the model when solving
+            Any input parameters to pass to the model when solving
         """
         inputs_dict = inputs_dict or {}
         # stack inputs
