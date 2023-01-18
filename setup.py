@@ -226,6 +226,7 @@ setup(
             "Sulzer2019 = pybamm.input.parameters.lead_acid.Sulzer2019:get_parameter_values",  # noqa: E501
             "Ai2020 = pybamm.input.parameters.lithium_ion.Ai2020:get_parameter_values",  # noqa: E501
             "Chen2020 = pybamm.input.parameters.lithium_ion.Chen2020:get_parameter_values",  # noqa: E501
+            "Chen2020_AH_VM_modified = pybamm.input.parameters.lithium_ion.Chen2020_AH_VM_modified:get_parameter_values",  # noqa: E501 #added by AH 20230116
             "Chen2020_composite = pybamm.input.parameters.lithium_ion.Chen2020_composite:get_parameter_values",  # noqa: E501
             "Ecker2015 = pybamm.input.parameters.lithium_ion.Ecker2015:get_parameter_values",  # noqa: E501
             "Marquis2019 = pybamm.input.parameters.lithium_ion.Marquis2019:get_parameter_values",  # noqa: E501
