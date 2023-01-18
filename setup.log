@@ -1,0 +1,24 @@
+2023-01-16 15:56:45,717 - PyBaMM setup - INFO - Starting PyBaMM setup
+2023-01-16 15:56:45,727 - PyBaMM setup - INFO - Running on Windows
+2023-01-16 15:56:45,728 - PyBaMM setup - INFO - Could not find CMake. Skipping compilation of KLU module.
+2023-01-16 15:56:45,728 - PyBaMM setup - INFO - Could not find PyBind11 directory (C:\Users\ahe16\Documents\GitHub\PyBaMM_Fork\pybind11). Skipping compilation of KLU module.
+2023-01-16 15:56:48,156 - PyBaMM setup - INFO - Starting PyBaMM setup
+2023-01-16 15:56:48,166 - PyBaMM setup - INFO - Running on Windows
+2023-01-16 15:56:48,167 - PyBaMM setup - INFO - Could not find CMake. Skipping compilation of KLU module.
+2023-01-16 15:56:48,167 - PyBaMM setup - INFO - Could not find PyBind11 directory (C:\Users\ahe16\Documents\GitHub\PyBaMM_Fork\pybind11). Skipping compilation of KLU module.
+2023-01-16 15:57:43,316 - PyBaMM setup - INFO - Starting PyBaMM setup
+2023-01-16 15:57:43,326 - PyBaMM setup - INFO - Running on Windows
+2023-01-16 15:57:43,327 - PyBaMM setup - INFO - Could not find CMake. Skipping compilation of KLU module.
+2023-01-16 15:57:43,327 - PyBaMM setup - INFO - Could not find PyBind11 directory (C:\Users\ahe16\Documents\GitHub\PyBaMM_Fork\pybind11). Skipping compilation of KLU module.
+2023-01-16 15:57:44,995 - PyBaMM setup - INFO - Starting PyBaMM setup
+2023-01-16 15:57:45,007 - PyBaMM setup - INFO - Running on Windows
+2023-01-16 15:57:45,008 - PyBaMM setup - INFO - Could not find CMake. Skipping compilation of KLU module.
+2023-01-16 15:57:45,008 - PyBaMM setup - INFO - Could not find PyBind11 directory (C:\Users\ahe16\Documents\GitHub\PyBaMM_Fork\pybind11). Skipping compilation of KLU module.
+2023-01-16 18:12:27,797 - PyBaMM setup - INFO - Starting PyBaMM setup
+2023-01-16 18:12:27,809 - PyBaMM setup - INFO - Running on Windows
+2023-01-16 18:12:27,810 - PyBaMM setup - INFO - Could not find CMake. Skipping compilation of KLU module.
+2023-01-16 18:12:27,810 - PyBaMM setup - INFO - Could not find PyBind11 directory (C:\Users\ahe16\Documents\GitHub\PyBaMM_Fork\pybind11). Skipping compilation of KLU module.
+2023-01-16 18:12:29,861 - PyBaMM setup - INFO - Starting PyBaMM setup
+2023-01-16 18:12:29,871 - PyBaMM setup - INFO - Running on Windows
+2023-01-16 18:12:29,872 - PyBaMM setup - INFO - Could not find CMake. Skipping compilation of KLU module.
+2023-01-16 18:12:29,872 - PyBaMM setup - INFO - Could not find PyBind11 directory (C:\Users\ahe16\Documents\GitHub\PyBaMM_Fork\pybind11). Skipping compilation of KLU module.
