@@ -96,7 +96,7 @@ Optional - scikits.odes solver
 
 Users can install `scikits.odes <https://github.com/bmcage/odes>`__ in
 order to use the wrapped SUNDIALS ODE and DAE
-`solvers <https://pybamm.readthedocs.io/en/latest/source/solvers/scikits_solvers.html>`__.
+`solvers <https://pybamm.readthedocs.io/en/latest/source/api/solvers/scikits_solvers.html>`__.
 Currently, only GNU/Linux and macOS are supported.
 
 GNU/Linux
@@ -196,12 +196,6 @@ not being used when I run my Python script.
 **Solution:** Make sure you have installed PyBaMM using the ``-e`` flag,
 i.e. ``pip install -e .``. This sets the installed location of the
 source files to your current directory.
-
-**Problem:** When running ``python run-tests.py --quick``, gives error
-``FileNotFoundError: [Errno 2] No such file or directory: 'flake8': 'flake8``.
-
-**Solution:** make sure you have included the ``[dev,docs]`` flags when
-you pip installed PyBaMM, i.e. ``pip install -e .[dev,docs]``
 
 **Problem:** Errors when solving model
 ``ValueError: Integrator name ida does not exsist``, or
