@@ -306,7 +306,7 @@ class ElectrodeSOHSolver:
         # Fall back to initial conditions calculated from limits
         x0_min, x100_max, y100_min, y0_max = self._get_lims(inputs)
         if self.known_value == "cyclable lithium capacity":
-            # trial and error suggests theses are good values
+            # trial and error suggests these are good values
             x100_init = np.minimum(x100_max, 0.8)
             x0_init = np.maximum(x0_min, 0.2)
             y100_init = np.maximum(y100_min, 0.2)
@@ -472,7 +472,7 @@ class ElectrodeSOHSolver:
         parameter_values = self.parameter_values
         param = self.param
         x_0, x_100, y_100, y_0 = self.get_min_max_stoichiometries()
-
+        print(x_0,x_100,y_0,y_100)
         if isinstance(initial_value, str) and initial_value.endswith("V"):
             V_init = float(initial_value[:-1])
             V_min = parameter_values.evaluate(param.opc_soc_0_dimensional)
@@ -540,7 +540,12 @@ class ElectrodeSOHSolver:
             inputs = {"Q_n": Q_n, "Q_p": Q_p, "Q": Q}
         # Solve the model and check outputs
         sol = self.solve(inputs)
+<<<<<<< develop
         return [sol["x_0"], sol["x_100"], sol["y_100"], sol["y_0"]]
+=======
+        print(sol["x_0"],sol["x_100"])
+        return [sol[var].data[0] for var in ["x_0", "x_100", "y_100", "y_0"]]
+>>>>>>> OCV curve addition
 
 
 def get_initial_stoichiometries(
