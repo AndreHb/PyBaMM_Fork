@@ -51,10 +51,8 @@ class SubMesh1D(SubMesh):
                     self.tabs[tab + " tab"] = "right"
                 else:
                     raise pybamm.GeometryError(
-                        """{} tab located at {}, but must be at either 0 or {}
-                        (in dimensionless coordinates).""".format(
-                            tab, tab_location, l_z
-                        )
+                        f"{tab} tab located at {tab_location}, "
+                        f"but must be at either 0 or {l_z}"
                     )
 
     def read_lims(self, lims):
@@ -111,14 +109,16 @@ class Exponential1DSubMesh(SubMesh1D):
     If side is "left", the gridpoints are given by
 
     .. math::
-        x_{k} = (b-a) + \\frac{\\exp{\\alpha k / N} - 1}{\\exp{\\alpha} - 1} + a,
+        x_{k} = (b-a) +
+        \\frac{\mathrm{e}^{\\alpha k / N} - 1}{\mathrm{e}^{\\alpha} - 1} + a,
 
     for k = 1, ..., N, where N is the number of nodes.
 
     Is side is "right", the gridpoints are given by
 
     .. math::
-        x_{k} = (b-a) + \\frac{\\exp{-\\alpha k / N} - 1}{\\exp{-\\alpha} - 1} + a,
+        x_{k} = (b-a) +
+        \\frac{\mathrm{e}^{-\\alpha k / N} - 1}{\mathrm{e}^{-\\alpha} - 1} + a,
 
     for k = 1, ..., N.
 
@@ -126,7 +126,8 @@ class Exponential1DSubMesh(SubMesh1D):
     gridpoints
 
     .. math::
-        x_{k} = (b/2-a) + \\frac{\\exp{\\alpha k / N} - 1}{\\exp{\\alpha} - 1} + a,
+        x_{k} = (b/2-a) +
+        \\frac{\mathrm{e}^{\\alpha k / N} - 1}{\mathrm{e}^{\\alpha} - 1} + a,
 
     for k = 1, ..., N. The grid spacing is then reflected to contruct the grid
     on the full interval [a,b].
@@ -369,28 +370,18 @@ class SpectralVolume1DSubMesh(SubMesh1D):
 
         coord_sys = spatial_var.coord_sys
 
+        array = np.array(
+            [
+                ((order + 1) - 1 - 2 * i) / (2 * (order + 1) - 2)
+                for i in range(order + 1)
+            ]
+        )
         cv_edges = np.array(
             [edges[0]]
             + [
                 x
                 for (a, b) in zip(edges[:-1], edges[1:])
-                for x in np.flip(
-                    a
-                    + 0.5
-                    * (b - a)
-                    * (
-                        1
-                        + np.sin(
-                            np.pi
-                            * np.array(
-                                [
-                                    ((order + 1) - 1 - 2 * i) / (2 * (order + 1) - 2)
-                                    for i in range(order + 1)
-                                ]
-                            )
-                        )
-                    )
-                )[1:]
+                for x in np.flip(a + 0.5 * (b - a) * (1 + np.sin(np.pi * array)))[1:]
             ]
         )
 
