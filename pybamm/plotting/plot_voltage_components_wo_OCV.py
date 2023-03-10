@@ -4,7 +4,7 @@
 import numpy as np
 
 
-def plot_voltage_components(
+def plot_voltage_components_wo_OCV(
     solution,
     ax=None,
     show_legend=True,
@@ -98,20 +98,20 @@ def plot_voltage_components(
         initial_ocv = initial_ocp_p - initial_ocp_n
         delta_ocp_n = ocp_n.entries - initial_ocp_n
         delta_ocp_p = ocp_p.entries - initial_ocp_p
-        ax.fill_between(
-            time,
-            initial_ocv - delta_ocp_n,
-            initial_ocv,
-            **kwargs_fill,
-            label="Negative open-circuit potential"
-        )
-        ax.fill_between(
-            time,
-            initial_ocv - delta_ocp_n + delta_ocp_p,
-            initial_ocv - delta_ocp_n,
-            **kwargs_fill,
-            label="Positive open-circuit potential"
-        )
+        # ax.fill_between(
+        #     time,
+        #     # initial_ocv - delta_ocp_n,
+        #     # initial_ocv,
+        #     **kwargs_fill,
+        #     label="Negative open-circuit potential"
+        # )
+        # ax.fill_between(
+        #     time,
+        #     # initial_ocv - delta_ocp_n + delta_ocp_p,
+        #     # initial_ocv - delta_ocp_n,
+        #     **kwargs_fill,
+        #     label="Positive open-circuit potential"
+        # )
         ocv = initial_ocv - delta_ocp_n + delta_ocp_p
     top = ocv
     # Plot components
