@@ -28,8 +28,6 @@ class _ElectrodeSOH(pybamm.BaseModel):
     .. [1] Mohtat, P., Lee, S., Siegel, J. B., & Stefanopoulou, A. G. (2019). Towards
            better estimability of electrode-specific state of health: Decoding the cell
            expansion. Journal of Power Sources, 427, 101-111.
-
-    **Extends:** :class:`pybamm.BaseModel`
     """
 
     def __init__(
@@ -245,7 +243,8 @@ class ElectrodeSOHSolver:
                 # if that didn't raise an error, raise the original error instead
                 raise split_error
 
-        return sol
+        sol_dict = {key: sol[key].data[0] for key in sol.all_models[0].variables.keys()}
+        return sol_dict
 
     def _set_up_solve(self, inputs):
         # Try with full sim
@@ -503,7 +502,7 @@ class ElectrodeSOHSolver:
             inputs = {"Q_n": Q_n, "Q_p": Q_p, "Q": Q}
         # Solve the model and check outputs
         sol = self.solve(inputs)
-        return [sol[var].data[0] for var in ["x_0", "x_100", "y_100", "y_0"]]
+        return [sol["x_0"], sol["x_100"], sol["y_100"], sol["y_0"]]
 
 
 def get_initial_stoichiometries(
@@ -559,3 +558,47 @@ def get_min_max_stoichiometries(
     """
     esoh_solver = ElectrodeSOHSolver(parameter_values, param, known_value)
     return esoh_solver.get_min_max_stoichiometries()
+
+
+def calculate_theoretical_energy(
+    parameter_values, initial_soc=1.0, final_soc=0.0, points=100
+):
+    """
+    Calculate maximum energy possible from a cell given OCV, initial soc, and final soc
+    given voltage limits, open-circuit potentials, etc defined by parameter_values
+
+    Parameters
+    ----------
+    parameter_values : :class:`pybamm.ParameterValues`
+        The parameter values class that will be used for the simulation.
+    initial_soc : float
+        The soc at begining of discharge, default 1.0
+    final_soc : float
+        The soc at end of discharge, default 1.0
+    points : int
+        The number of points at which to calculate voltage.
+
+    Returns
+    -------
+    E
+        The total energy of the cell in Wh
+    """
+    # Get initial and final stoichiometric values.
+    n_i, p_i = get_initial_stoichiometries(initial_soc, parameter_values)
+    n_f, p_f = get_initial_stoichiometries(final_soc, parameter_values)
+    n_vals = np.linspace(n_i, n_f, num=points)
+    p_vals = np.linspace(p_i, p_f, num=points)
+    # Calculate OCV at each stoichiometry
+    param = pybamm.LithiumIonParameters()
+    T = param.T_amb(0)
+    Vs = np.empty(n_vals.shape)
+    for i in range(n_vals.size):
+        Vs[i] = parameter_values.evaluate(
+            param.p.prim.U(p_vals[i], T)
+        ) - parameter_values.evaluate(param.n.prim.U(n_vals[i], T))
+    # Calculate dQ
+    Q_p = parameter_values.evaluate(param.p.prim.Q_init) * (p_f - p_i)
+    dQ = Q_p / (points - 1)
+    # Integrate and convert to W-h
+    E = np.trapz(Vs, dx=dQ)
+    return E
