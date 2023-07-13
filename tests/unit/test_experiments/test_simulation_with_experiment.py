@@ -1,14 +1,16 @@
 #
 # Test setting up a simulation with an experiment
 #
+from tests import TestCase
 import casadi
 import pybamm
 import numpy as np
 import os
 import unittest
+from datetime import datetime
 
 
-class TestSimulationExperiment(unittest.TestCase):
+class TestSimulationExperiment(TestCase):
     def test_set_up(self):
         experiment = pybamm.Experiment(
             [
@@ -24,20 +26,20 @@ class TestSimulationExperiment(unittest.TestCase):
         C = model.default_parameter_values["Nominal cell capacity [A.h]"]
 
         self.assertEqual(sim.experiment.args, experiment.args)
-        op_conds = sim.experiment.operating_conditions
-        self.assertEqual(op_conds[0]["Current input [A]"], C / 20)
-        self.assertEqual(op_conds[1]["Current input [A]"], -1)
-        self.assertEqual(op_conds[2]["Voltage input [V]"], 4.1)
-        self.assertEqual(op_conds[3]["Power input [W]"], 2)
+        op_conds = sim.experiment.operating_conditions_steps
+        self.assertEqual(op_conds[0].value, C / 20)
+        self.assertEqual(op_conds[1].value, -1)
+        self.assertEqual(op_conds[2].value, 4.1)
+        self.assertEqual(op_conds[3].value, 2)
 
         Crate = 1 / C
         self.assertEqual(
-            [op["time"] for op in op_conds],
+            [op.duration for op in op_conds],
             [3600, 3 / Crate * 3600, 24 * 3600, 24 * 3600],
         )
 
-        model_I = sim.op_string_to_model["Charge at 1 A until 4.1 V"]
-        model_V = sim.op_string_to_model["Hold at 4.1 V until 50 mA"]
+        model_I = sim.experiment_unique_steps_to_model[repr(op_conds[1])]  # CC charge
+        model_V = sim.experiment_unique_steps_to_model[repr(op_conds[2])]  # CV hold
         self.assertIn(
             "Current cut-off [A] [experiment]",
             [event.name for event in model_V.events],
@@ -51,17 +53,35 @@ class TestSimulationExperiment(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, "experiment must be"):
             pybamm.Simulation(model, experiment=0)
 
+    def test_setup_experiment_string_or_list(self):
+        model = pybamm.lithium_ion.SPM()
+
+        sim = pybamm.Simulation(model, experiment="Discharge at C/20 for 1 hour")
+        sim.build_for_experiment()
+        self.assertEqual(len(sim.experiment.operating_conditions_steps), 1)
+        self.assertEqual(
+            sim.experiment.operating_conditions_steps[0].description,
+            "Discharge at C/20 for 1 hour",
+        )
+        sim = pybamm.Simulation(
+            model,
+            experiment=["Discharge at C/20 for 1 hour", pybamm.step.rest(60)],
+        )
+        sim.build_for_experiment()
+        self.assertEqual(len(sim.experiment.operating_conditions_steps), 2)
+
     def test_run_experiment(self):
+        s = pybamm.step.string
         experiment = pybamm.Experiment(
             [
                 (
-                    "Discharge at C/20 for 1 hour at 30.5oC",
-                    "Charge at 1 A until 4.1 V at 24oC",
-                    "Hold at 4.1 V until C/2 at 24oC",
+                    s("Discharge at C/20 for 1 hour", temperature="30.5oC"),
+                    s("Charge at 1 A until 4.1 V", temperature="24oC"),
+                    s("Hold at 4.1 V until C/2", temperature="24oC"),
                     "Discharge at 2 W for 1 hour",
                 )
             ],
-            temperature=-14,
+            temperature="-14oC",
         )
         model = pybamm.lithium_ion.SPM()
         sim = pybamm.Simulation(model, experiment=experiment)
@@ -128,11 +148,12 @@ class TestSimulationExperiment(unittest.TestCase):
         os.remove("test_experiment.sav")
 
     def test_run_experiment_multiple_times(self):
+        s = pybamm.step.string
         experiment = pybamm.Experiment(
             [
                 (
-                    "Discharge at C/20 for 1 hour at 24oC",
-                    "Charge at C/20 until 4.1 V at 26oC",
+                    s("Discharge at C/20 for 1 hour", temperature="24oC"),
+                    s("Charge at C/20 until 4.1 V", temperature="26oC"),
                 )
             ]
             * 3
@@ -146,49 +167,6 @@ class TestSimulationExperiment(unittest.TestCase):
         np.testing.assert_array_equal(
             sol1["Voltage [V]"].data, sol2["Voltage [V]"].data
         )
-
-    def test_run_experiment_cccv_ode(self):
-        experiment_2step = pybamm.Experiment(
-            [
-                (
-                    "Discharge at C/20 for 1 hour at 20oC",
-                    "Charge at 1 A until 4.1 V at 24oC",
-                    "Hold at 4.1 V until C/2 at 24oC",
-                    "Discharge at 2 W for 1 hour",
-                ),
-            ],
-        )
-        experiment_ode = pybamm.Experiment(
-            [
-                (
-                    "Discharge at C/20 for 1 hour at 20oC",
-                    "Charge at 1 A until 4.1 V at 24oC",
-                    "Hold at 4.1 V until C/2 at 24oC",
-                    "Discharge at 2 W for 1 hour",
-                ),
-            ],
-            cccv_handling="ode",
-        )
-        solutions = []
-        for experiment in [experiment_2step, experiment_ode]:
-            model = pybamm.lithium_ion.SPM()
-            sim = pybamm.Simulation(model, experiment=experiment)
-            solution = sim.solve(solver=pybamm.CasadiSolver("fast with events"))
-            solutions.append(solution)
-
-        t = solutions[1]["Time [s]"].data
-        np.testing.assert_array_almost_equal(
-            solutions[0]["Voltage [V]"](t=t),
-            solutions[1]["Voltage [V]"](t=t),
-            decimal=1,
-        )
-        np.testing.assert_array_almost_equal(
-            solutions[0]["Current [A]"](t=t),
-            solutions[1]["Current [A]"](t=t),
-            decimal=0,
-        )
-
-        self.assertEqual(solutions[1].termination, "final time")
 
     @unittest.skipIf(not pybamm.have_idaklu(), "idaklu solver is not installed")
     def test_run_experiment_cccv_solvers(self):
@@ -228,19 +206,19 @@ class TestSimulationExperiment(unittest.TestCase):
         experiment = pybamm.Experiment(
             [
                 (
-                    "Run drive_cycle (A) at 35oC",
-                    "Run drive_cycle (V)",
-                    "Run drive_cycle (W)",
+                    pybamm.step.current(drive_cycle, temperature="35oC"),
+                    pybamm.step.voltage(drive_cycle),
+                    pybamm.step.power(drive_cycle, termination="3 V"),
                 )
             ],
-            drive_cycles={"drive_cycle": drive_cycle},
         )
         model = pybamm.lithium_ion.SPM()
         sim = pybamm.Simulation(model, experiment=experiment)
         sim.build_for_experiment()
-        self.assertIn(("Run drive_cycle (A) at 35oC"), sim.op_string_to_model)
-        self.assertIn(("Run drive_cycle (V)"), sim.op_string_to_model)
-        self.assertIn(("Run drive_cycle (W)"), sim.op_string_to_model)
+        self.assertEqual(
+            sorted([repr(step) for step in experiment.operating_conditions_steps]),
+            sorted(list(sim.experiment_unique_steps_to_model.keys())),
+        )
 
     def test_run_experiment_breaks_early_infeasible(self):
         experiment = pybamm.Experiment(["Discharge at 2 C for 1 hour"])
@@ -256,11 +234,12 @@ class TestSimulationExperiment(unittest.TestCase):
         self.assertEqual(sim._solution.termination, "event: Minimum voltage [V]")
 
     def test_run_experiment_breaks_early_error(self):
+        s = pybamm.step.string
         experiment = pybamm.Experiment(
             [
                 (
                     "Rest for 10 minutes",
-                    "Discharge at 20 C for 10 minutes (10 minute period)",
+                    s("Discharge at 20 C for 10 minutes", period="10 minutes"),
                 )
             ]
         )
@@ -282,7 +261,7 @@ class TestSimulationExperiment(unittest.TestCase):
         experiment = pybamm.Experiment(
             [
                 "Rest for 10 minutes",
-                "Discharge at 20 C for 10 minutes (10 minute period)",
+                s("Discharge at 20 C for 10 minutes", period="10 minutes"),
             ]
         )
         sim = pybamm.Simulation(
@@ -340,6 +319,21 @@ class TestSimulationExperiment(unittest.TestCase):
         sol = sim.solve(solver=pybamm.CasadiSolver())
         # all but the last value should be above the termination condition
         np.testing.assert_array_less(5.04, C[:-1])
+
+    def test_run_experiment_with_pbar(self):
+        # The only thing to test here is for errors.
+        experiment = pybamm.Experiment(
+            [
+                (
+                    "Discharge at 1C for 1 sec",
+                    "Charge at 1C for 1 sec",
+                ),
+            ]
+            * 10,
+        )
+        model = pybamm.lithium_ion.SPM()
+        sim = pybamm.Simulation(model, experiment=experiment)
+        sim.solve(showprogress=True)
 
     def test_run_experiment_termination_voltage(self):
         # with percent
@@ -546,6 +540,23 @@ class TestSimulationExperiment(unittest.TestCase):
         with self.assertRaisesRegex(pybamm.SolverError, "All steps in the cycle"):
             sim.solve()
 
+    def test_solver_error(self):
+        model = pybamm.lithium_ion.DFN()  # load model
+        parameter_values = pybamm.ParameterValues("Chen2020")
+        experiment = pybamm.Experiment(
+            ["Discharge at 10C for 6 minutes or until 2.5 V"]
+        )
+
+        sim = pybamm.Simulation(
+            model,
+            parameter_values=parameter_values,
+            experiment=experiment,
+            solver=pybamm.CasadiSolver(mode="fast"),
+        )
+
+        with self.assertRaisesRegex(pybamm.SolverError, "IDA_CONV_FAIL"):
+            sim.solve()
+
     def test_run_experiment_half_cell(self):
         experiment = pybamm.Experiment(
             [("Discharge at C/20 until 3.5V", "Charge at 1C until 3.8 V")]
@@ -565,6 +576,69 @@ class TestSimulationExperiment(unittest.TestCase):
         model = pybamm.lead_acid.Full()
         sim = pybamm.Simulation(model, experiment=experiment)
         sim.solve()
+
+    def test_padding_rest_model(self):
+        model = pybamm.lithium_ion.SPM()
+
+        # Test no padding rest model if there are no start_times
+        experiment = pybamm.Experiment(["Rest for 1 hour"])
+        sim = pybamm.Simulation(model, experiment=experiment)
+        sim.build_for_experiment()
+        self.assertNotIn(
+            "Rest for padding", sim.experiment_unique_steps_to_model.keys()
+        )
+
+        # Test padding rest model exists if there are start_times
+        experiment = pybamm.step.string(
+            "Rest for 1 hour", start_time=datetime(1, 1, 1, 8, 0, 0)
+        )
+        sim = pybamm.Simulation(model, experiment=experiment)
+        sim.build_for_experiment()
+        self.assertIn("Rest for padding", sim.experiment_unique_steps_to_model.keys())
+        # Check at least there is an input parameter (temperature)
+        self.assertGreater(
+            len(sim.experiment_unique_steps_to_model["Rest for padding"].parameters), 0
+        )
+        # Check the model is the same
+        self.assertIsInstance(
+            sim.experiment_unique_steps_to_model["Rest for padding"],
+            pybamm.lithium_ion.SPM,
+        )
+
+    def test_run_time_stamped_experiment(self):
+        model = pybamm.lithium_ion.SPM()
+
+        # Test experiment is cut short if next_start_time is early
+        experiment = pybamm.Experiment(
+            [
+                pybamm.step.string(
+                    "Discharge at 0.5C for 1 hour",
+                    start_time=datetime(2023, 1, 1, 8, 0, 0),
+                ),
+                pybamm.step.string(
+                    "Rest for 1 hour", start_time=datetime(2023, 1, 1, 8, 30, 0)
+                ),
+            ]
+        )
+        sim = pybamm.Simulation(model, experiment=experiment)
+        sol = sim.solve(calc_esoh=False)
+        self.assertEqual(sol["Time [s]"].entries[-1], 5400)
+
+        # Test padding rest is added if time stamp is late
+        experiment = pybamm.Experiment(
+            [
+                pybamm.step.string(
+                    "Discharge at 0.5C for 1 hour",
+                    start_time=datetime(2023, 1, 1, 8, 0, 0),
+                ),
+                pybamm.step.string(
+                    "Rest for 1 hour", start_time=datetime(2023, 1, 1, 10, 0, 0)
+                ),
+            ]
+        )
+        sim = pybamm.Simulation(model, experiment=experiment)
+        sol = sim.solve(calc_esoh=False)
+        self.assertEqual(sol["Time [s]"].entries[-1], 10800)
 
 
 if __name__ == "__main__":

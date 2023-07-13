@@ -1,6 +1,7 @@
 #
 # Test for the extrapolations in the finite volume class
 #
+from tests import TestCase
 import pybamm
 from tests import (
     get_mesh_for_testing,
@@ -39,8 +40,9 @@ def errors(pts, function, method_options, bcs=None):
     left_extrap_processed = disc.process_symbol(left_extrap)
     right_extrap_processed = disc.process_symbol(right_extrap)
 
-    l_error = np.abs(l_true - left_extrap_processed.evaluate(None, y))
-    r_error = np.abs(r_true - right_extrap_processed.evaluate(None, y))
+    # address numpy 1.25 deprecation warning: array should have ndim=0 before conversion
+    l_error = np.abs(l_true - left_extrap_processed.evaluate(None, y)).item()
+    r_error = np.abs(r_true - right_extrap_processed.evaluate(None, y)).item()
 
     return l_error, r_error
 
@@ -55,7 +57,7 @@ def get_errors(function, method_options, pts, bcs=None):
     return l_errors, r_errors
 
 
-class TestExtrapolation(unittest.TestCase):
+class TestExtrapolation(TestCase):
     def test_convergence_without_bcs(self):
         # all tests are performed on x in [0, 1]
         linear = {"extrapolation": {"order": "linear"}}

@@ -1,21 +1,20 @@
 import pybamm
 import numpy as np
 import pandas as pd
+from tests import TestCase
 import os
 import sys
 import unittest
 import uuid
 
 
-class TestSimulation(unittest.TestCase):
+class TestSimulation(TestCase):
     def test_simple_model(self):
         model = pybamm.BaseModel()
         v = pybamm.Variable("v")
-        a = pybamm.Parameter("a")
-        model.rhs = {v: -a * v}
+        model.rhs = {v: -v}
         model.initial_conditions = {v: 1}
-        param = pybamm.ParameterValues({"a": 1})
-        sim = pybamm.Simulation(model, parameter_values=param)
+        sim = pybamm.Simulation(model)
         sol = sim.solve([0, 1])
         np.testing.assert_array_almost_equal(sol.y.full()[0], np.exp(-sol.t), decimal=5)
 
@@ -178,7 +177,9 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(sim._built_initial_soc, 1)
         sim.solve(t_eval=[0, 600], initial_soc=0.5)
         self.assertEqual(sim._built_initial_soc, 0.5)
-        exp = pybamm.Experiment(["Discharge at 1C until 3.6V (1 minute period)"])
+        exp = pybamm.Experiment(
+            [pybamm.step.string("Discharge at 1C until 3.6V", period="1 minute")]
+        )
         sim = pybamm.Simulation(model, parameter_values=param, experiment=exp)
         sim.solve(initial_soc=0.8)
         self.assertEqual(sim._built_initial_soc, 0.8)
@@ -307,9 +308,13 @@ class TestSimulation(unittest.TestCase):
         sim.solve([0, 600])
         sim.save("test.pickle")
 
-        # with Casadi solver
+        # with Casadi solver & experiment
         model.convert_to_format = "casadi"
-        sim = pybamm.Simulation(model, solver=pybamm.CasadiSolver())
+        sim = pybamm.Simulation(
+            model,
+            experiment="Discharge at 1C for 20 minutes",
+            solver=pybamm.CasadiSolver(),
+        )
         sim.solve([0, 600])
         sim.save("test.pickle")
         sim_load = pybamm.load_sim("test.pickle")

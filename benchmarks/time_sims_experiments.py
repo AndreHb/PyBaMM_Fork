@@ -17,10 +17,17 @@ class TimeSimulation:
             "Hold at 4.1 V until 10 mA",
             "Rest for 1 hour",
         ],
-        "GITT": [("Discharge at C/20 for 1 hour", "Rest for 1 hour")] * 20,
+        "GITT": [("Discharge at C/20 for 1 hour", "Rest for 1 hour")] * 10,
     }
 
     def setup(self, experiment, parameters, model_class, solver_class):
+        if (experiment, parameters, model_class, solver_class) == (
+            "GITT",
+            "Marquis2019",
+            pybamm.lithium_ion.DFN,
+            pybamm.CasadiSolver,
+        ):
+            raise NotImplementedError
         self.param = pybamm.ParameterValues(parameters)
         self.model = model_class()
         self.solver = solver_class()

@@ -142,7 +142,7 @@ for file_ext in ["*.csv", "*.py", "*.md", "*.txt"]:
     pybamm_data.extend(
         [os.path.join(*Path(filename).parts[1:]) for filename in list_of_files]
     )
-pybamm_data.append("./CITATIONS.txt")
+pybamm_data.append("./CITATIONS.bib")
 pybamm_data.append("./plotting/pybamm.mplstyle")
 pybamm_data.append("../CMakeBuild.py")
 
@@ -186,38 +186,85 @@ setup(
     },
     package_data={"pybamm": pybamm_data},
     # Python version
-    python_requires=">=3.8,<3.10",
+    python_requires=">=3.8,<3.12",
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Topic :: Scientific/Engineering",
+    ],
     # List of dependencies
     install_requires=[
         "numpy>=1.16",
         "scipy>=1.3",
         "pandas>=0.24",
-        "anytree>=2.4.3",
-        "autograd>=1.2",
-        "scikit-fem>=0.2.0",
-        "casadi>=3.5.0",
-        "imageio>=2.9.0",
-        "jupyter",  # For example notebooks
-        "pybtex>=0.24.0",
-        "sympy>=1.8",
-        "bpx",
-        # Note: Matplotlib is loaded for debug plots, but to ensure pybamm runs
-        # on systems without an attached display, it should never be imported
-        # outside of plot() methods.
-        # Should not be imported
-        "matplotlib>=2.0",
+        "casadi>=3.6.0",
+        "xarray",
     ],
     extras_require={
         "docs": [
-            "sphinx>=1.5",
+            "sphinx>=6",
+            "sphinx_rtd_theme>=0.5",
             "pydata-sphinx-theme",
             "sphinx_design",
             "sphinx-copybutton",
             "myst-parser",
+            "sphinx-inline-tabs",
+            "sphinxcontrib-bibtex",
+            "sphinx-autobuild",
+            "sphinx-last-updated-by-git",
+            "nbsphinx",
+            "ipykernel",
+            "ipywidgets",
+            "sphinx-gallery",
+            "sphinx-hoverxref",
         ],  # For doc generation
+        "examples": [
+            "jupyter",  # For example notebooks
+        ],
+        "plot": [
+            "imageio>=2.9.0",
+            # Note: Matplotlib is loaded for debug plots, but to ensure pybamm runs
+            # on systems without an attached display, it should never be imported
+            # outside of plot() methods.
+            # Should not be imported
+            "matplotlib>=2.0",
+        ],
+        "cite": [
+            "pybtex>=0.24.0",
+        ],
+        "latexify": [
+            "sympy>=1.8",
+        ],
+        "bpx": [
+            "bpx",
+        ],
+        "tqdm": [
+            "tqdm",
+        ],
         "dev": [
             "pre-commit",  # For code style checking
             "black",  # For code style auto-formatting
+        ],
+        "all": [
+            "anytree>=2.4.3",
+            "autograd>=1.2",
+            "scikit-fem>=0.2.0",
+            "imageio>=2.9.0",
+            "pybtex>=0.24.0",
+            "sympy>=1.8",
+            "bpx",
+            "tqdm",
+            "matplotlib>=2.0",
+            "jupyter",
         ],
     },
     entry_points={

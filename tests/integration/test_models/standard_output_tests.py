@@ -145,7 +145,7 @@ class VoltageTests(BaseOutputTest):
         self.ocp_p = solution[
             f"Positive electrode {self.phase_name_p}bulk open-circuit potential [V]"
         ]
-        self.ocv = solution["Open-circuit voltage [V]"]
+        self.ocv = solution["Bulk open-circuit voltage [V]"]
         self.voltage = solution["Voltage [V]"]
 
     def test_each_reaction_overpotential(self):
@@ -842,7 +842,7 @@ class VelocityTests(BaseOutputTest):
         DeltaV_n = self.param.evaluate(DeltaV_n)
         DeltaV_p = self.model.param.p.DeltaV
         DeltaV_p = self.param.evaluate(DeltaV_p)
-        F = self.model.param.F.value
+        F = pybamm.constants.F.value
 
         np.testing.assert_array_almost_equal(
             self.v_box(t, x_n), DeltaV_n * self.i_e(t, x_n) / F

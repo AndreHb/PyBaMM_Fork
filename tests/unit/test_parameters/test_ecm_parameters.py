@@ -1,6 +1,7 @@
 #
 # Tests for the equivalent circuit parameters
 #
+from tests import TestCase
 import pybamm
 import unittest
 
@@ -14,6 +15,8 @@ values = {
     "Current function [A]": 100,
     "Upper voltage cut-off [V]": 4.2,
     "Lower voltage cut-off [V]": 3.2,
+    "Open-circuit voltage at 0% SOC [V]": 2.8,
+    "Open-circuit voltage at 100% SOC [V]": 4.2,
     "Cell thermal mass [J/K]": 1000,
     "Cell-jig heat transfer coefficient [W/K]": 10,
     "Jig thermal mass [J/K]": 500,
@@ -30,7 +33,7 @@ values = {
 parameter_values = pybamm.ParameterValues(values)
 
 
-class TestEcmParameters(unittest.TestCase):
+class TestEcmParameters(TestCase):
     def test_init_parameters(self):
         param = pybamm.EcmParameters()
 

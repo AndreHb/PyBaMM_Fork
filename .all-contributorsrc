@@ -441,7 +441,7 @@
       "login": "wigging",
       "name": "Gavin Wiggins",
       "avatar_url": "https://avatars.githubusercontent.com/u/6828967?v=4",
-      "profile": "https://gavinw.me",
+      "profile": "https://wigging.me",
       "contributions": [
         "bug",
         "code"
@@ -570,7 +570,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/31622972?v=4",
       "profile": "https://aniketsinghrawat.vercel.app/",
       "contributions": [
-        "code"
+        "code",
+        "doc"
       ]
     },
     {
@@ -592,6 +593,73 @@
       "contributions": [
         "example"
       ]
+    },
+    {
+      "login": "jsbrittain",
+      "name": "jsbrittain",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98161205?v=4",
+      "profile": "http://www.jsbrittain.com/",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "arjxn-py",
+      "name": "Arjun",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104268427?v=4",
+      "profile": "https://github.com/arjxn-py",
+      "contributions": [
+        "infra"
+      ]
+    },
+    {
+      "login": "chenzhao-py",
+      "name": "CHEN ZHAO",
+      "avatar_url": "https://avatars.githubusercontent.com/u/75906533?v=4",
+      "profile": "https://github.com/chenzhao-py",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "darryl-ad",
+      "name": "darryl-ad",
+      "avatar_url": "https://avatars.githubusercontent.com/u/91731499?v=4",
+      "profile": "https://www.aboutenergy.io/",
+      "contributions": [
+        "code",
+        "bug"
+      ]
+    },
+    {
+      "login": "julian-evers",
+      "name": "julian-evers",
+      "avatar_url": "https://avatars.githubusercontent.com/u/133691040?v=4",
+      "profile": "https://github.com/julian-evers",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "js1tr3",
+      "name": "Jason Siegel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/633873?v=4",
+      "profile": "https://batterycontrolgroup.engin.umich.edu/",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "tommaull",
+      "name": "Tom Maull",
+      "avatar_url": "https://avatars.githubusercontent.com/u/101814207?v=4",
+      "profile": "https://github.com/tommaull",
+      "contributions": [
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -600,5 +668,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": true,
-  "commitConvention": "angular"
+  "commitConvention": "angular",
+  "commitType": "docs"
 }

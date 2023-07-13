@@ -1,11 +1,12 @@
 #
 # Tests for the lithium-ion electrode-specific SOH model
 #
+from tests import TestCase
 import pybamm
 import unittest
 
 
-class TestElectrodeSOH(unittest.TestCase):
+class TestElectrodeSOH(TestCase):
     def test_known_solution(self):
         param = pybamm.LithiumIonParameters()
         parameter_values = pybamm.ParameterValues("Mohtat2020")
@@ -31,7 +32,18 @@ class TestElectrodeSOH(unittest.TestCase):
         ics = esoh_solver._set_up_solve(inputs)
         sol_split = esoh_solver._solve_split(inputs, ics)
         for key in sol:
-            self.assertAlmostEqual(sol[key], sol_split[key].data[0], places=5)
+            if key != "Maximum theoretical energy [W.h]":
+                self.assertAlmostEqual(sol[key], sol_split[key].data[0], places=5)
+            else:
+                # theoretical_energy is not present in sol_split
+                x_0 = sol_split["x_0"].data[0]
+                y_0 = sol_split["y_0"].data[0]
+                x_100 = sol_split["x_100"].data[0]
+                y_100 = sol_split["y_100"].data[0]
+                energy = pybamm.lithium_ion.electrode_soh.theoretical_energy_integral(
+                    parameter_values, x_100, x_0, y_100, y_0
+                )
+                self.assertAlmostEqual(sol[key], energy, places=5)
 
         # should still work with old inputs
         n_Li = parameter_values.evaluate(param.n_Li_particles_init)
@@ -82,7 +94,11 @@ class TestElectrodeSOH(unittest.TestCase):
 
         Q_Li = parameter_values.evaluate(param.Q_Li_particles_init)
         parameter_values.update(
-            {"Lower voltage cut-off [V]": 0, "Upper voltage cut-off [V]": 5}
+            {
+                "Open-circuit voltage at 0% SOC [V]": 0,
+                "Open-circuit voltage at 100% SOC [V]": 5,
+            }
+            # need to update both the target voltages at 0 and 100% SOC
         )
         esoh_solver = pybamm.lithium_ion.ElectrodeSOHSolver(parameter_values, param)
         inputs = {"Q_n": Q_n, "Q_p": Q_p, "Q_Li": Q_Li}
@@ -93,7 +109,12 @@ class TestElectrodeSOH(unittest.TestCase):
             esoh_solver.solve(inputs)
         # Solver fails to find a solution due to upper voltage limit
         parameter_values.update(
-            {"Lower voltage cut-off [V]": 0, "Upper voltage cut-off [V]": 6}
+            {
+                "Lower voltage cut-off [V]": 0,
+                "Upper voltage cut-off [V]": 6,
+                "Open-circuit voltage at 0% SOC [V]": 0,
+                "Open-circuit voltage at 100% SOC [V]": 6,
+            }
         )
         esoh_solver = pybamm.lithium_ion.ElectrodeSOHSolver(parameter_values, param)
         inputs = {"Q_n": Q_n, "Q_p": Q_p, "Q_Li": Q_Li}
@@ -101,7 +122,12 @@ class TestElectrodeSOH(unittest.TestCase):
             esoh_solver.solve(inputs)
         # Solver fails to find a solution due to lower voltage limit
         parameter_values.update(
-            {"Lower voltage cut-off [V]": -10, "Upper voltage cut-off [V]": 5}
+            {
+                "Lower voltage cut-off [V]": -10,
+                "Upper voltage cut-off [V]": 5,
+                "Open-circuit voltage at 0% SOC [V]": -10,
+                "Open-circuit voltage at 100% SOC [V]": 5,
+            }
         )
         esoh_solver = pybamm.lithium_ion.ElectrodeSOHSolver(parameter_values, param)
         inputs = {"Q_n": Q_n, "Q_p": Q_p, "Q_Li": Q_Li}
@@ -110,7 +136,12 @@ class TestElectrodeSOH(unittest.TestCase):
 
         # errors for cell capacity based solver
         parameter_values.update(
-            {"Lower voltage cut-off [V]": 3, "Upper voltage cut-off [V]": 4.2}
+            {
+                "Lower voltage cut-off [V]": 3,
+                "Upper voltage cut-off [V]": 4.2,
+                "Open-circuit voltage at 0% SOC [V]": 3,
+                "Open-circuit voltage at 100% SOC [V]": 4.2,
+            }
         )
         esoh_solver = pybamm.lithium_ion.ElectrodeSOHSolver(
             parameter_values, param, known_value="cell capacity"
@@ -125,7 +156,7 @@ class TestElectrodeSOH(unittest.TestCase):
             esoh_solver.solve(inputs)
 
 
-class TestElectrodeSOHHalfCell(unittest.TestCase):
+class TestElectrodeSOHHalfCell(TestCase):
     def test_known_solution(self):
         model = pybamm.lithium_ion.ElectrodeSOHHalfCell("positive")
 
@@ -143,7 +174,7 @@ class TestElectrodeSOHHalfCell(unittest.TestCase):
         self.assertAlmostEqual(sol["Uw(x_0)"].data[0], V_min, places=5)
 
 
-class TestCalculateTheoreticalEnergy(unittest.TestCase):
+class TestCalculateTheoreticalEnergy(TestCase):
     def test_efficiency(self):
         model = pybamm.lithium_ion.DFN(options={"calculate discharge energy": "true"})
         parameter_values = pybamm.ParameterValues("Chen2020")
@@ -162,7 +193,7 @@ class TestCalculateTheoreticalEnergy(unittest.TestCase):
         self.assertLess(0, theoretical_energy)
 
 
-class TestGetInitialSOC(unittest.TestCase):
+class TestGetInitialSOC(TestCase):
     def test_initial_soc(self):
         param = pybamm.LithiumIonParameters()
         parameter_values = pybamm.ParameterValues("Mohtat2020")
