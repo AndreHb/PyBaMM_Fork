@@ -24,7 +24,7 @@ def graphite_LGM50_ocp_Chen2020(sto):
         Open circuit potential
     """
 
-    u_eq = (
+    u_eqqq = (
         57194.9119279 * pybamm.exp(-591.59463163221 * sto)
         + 0.8837919007067767
         - 0.7181358535* pybamm.tanh(35.60941598 * (sto - 0.017213))
@@ -32,7 +32,109 @@ def graphite_LGM50_ocp_Chen2020(sto):
         - 0.057250544 * pybamm.tanh(11.2003946103 * (sto - 0.16110909577420))
     )
 
-    return u_eq
+    return u_eqqq
+
+def NMC811_DiffKoeffi_BA_RasmusBewer_Li(sto):
+    """
+    8th degree polnomial fit for GITT measurement with sucessful parameter determination in SoC range betweenn 10 and 90 %
+
+    Retrieved from charge direction of GITT technique.
+
+    Parameters for 3 electrode cell setup with aGr/Li/NMC811
+
+    Parameters
+    ----------
+    sto: :class:`pybamm.Symbol`
+        Electrode stochiometry
+
+    Returns
+    -------
+    :class:`pybamm.Symbol`
+        diffusion coefficient
+    """
+
+    D_Li = (
+        9.698e-11 * sto**8
+        - 3.753e-10 * sto**7
+        + 6.038e-10 * sto**6
+        - 5.255e-10 * sto**5
+        + 2.691e-10 * sto**4
+        - 8.249e-11 * sto**3
+        + 1.468e-11 * sto**2
+        - 1.383e-12 * sto
+        + 5.541e-14
+
+    )
+
+    return D_Li
+
+def NMC811_DiffKoeffi_BA_RasmusBewer_Au1(sto):
+    """
+    8th degree polnomial fit for GITT measurement with sucessful parameter determination in SoC range betweenn 10 and 90 %
+
+    Retrieved from charge direction of GITT technique.
+
+    Parameters for 3 electrode cell setup (#1) with aGr/Au(Li)/NMC811
+
+    Parameters
+    ----------
+    sto: :class:`pybamm.Symbol`
+        Electrode stochiometry
+
+    Returns
+    -------
+    :class:`pybamm.Symbol`
+        diffusion coefficient
+    """
+
+    D_Li = (
+        2.755e-10 * sto**8
+        - 9.416e-10 * sto**7
+        + 1.358e-09 * sto**6
+        - 1.074e-09 * sto**5
+        + 5.068e-10 * sto**4
+        - 1.45e-10 * sto**3
+        + 2.44e-11 * sto**2
+        - 2.203e-12 * sto
+        + 8.438e-14
+
+    )
+
+    return D_Li
+
+def NMC811_DiffKoeffi_BA_RasmusBewer_Au2(sto):
+    """
+    8th degree polnomial fit for GITT measurement with sucessful parameter determination in SoC range betweenn 10 and 90 %
+
+    Retrieved from charge direction of GITT technique.
+
+    Parameters for 3 electrode cell setup (#2) with aGr/Au(Li)/NMC811
+
+    Parameters
+    ----------
+    sto: :class:`pybamm.Symbol`
+        Electrode stochiometry
+
+    Returns
+    -------
+    :class:`pybamm.Symbol`
+        Open circuit potential
+    """
+
+    D_Li = (
+        6.819e-12 * sto**8
+        - 6.747e-11 * sto**7
+        + 1.48e-10 * sto**6
+        - 1.457e-10 * sto**5
+        + 7.616e-11 * sto**4
+        - 2.203e-11 * sto**3
+        + 3.43e-12 * sto**2
+        - 2.632e-13 * sto
+        + 1.037e-14
+
+    )
+
+    return D_Li
 
 
 def graphite_LGM50_electrolyte_exchange_current_density_Chen2020(
@@ -305,8 +407,8 @@ def get_parameter_values():
         "Negative current collector thermal conductivity [W.m-1.K-1]": 401.0,
         "Positive current collector thermal conductivity [W.m-1.K-1]": 237.0,
         "Nominal cell capacity [A.h]": 5.0,
-        "Typical current [A]": 5.0,
         "Current function [A]": 5.0,
+        "Contact resistance [Ohm]": 0,
         # negative electrode
         "Negative electrode conductivity [S.m-1]": 215.0,
         "Maximum concentration in negative electrode [mol.m-3]": 33133.0,
@@ -316,9 +418,7 @@ def get_parameter_values():
         "Negative electrode active material volume fraction": 0.75,
         "Negative particle radius [m]": 5.86e-06,
         "Negative electrode Bruggeman coefficient (electrolyte)": 1.5,
-        "Negative electrode Bruggeman coefficient (electrode)": 1.5,
-        "Negative electrode cation signed stoichiometry": -1.0,
-        "Negative electrode electrons in reaction": 1.0,
+        "Negative electrode Bruggeman coefficient (electrode)": 0,
         "Negative electrode charge transfer coefficient": 0.5,
         "Negative electrode double-layer capacity [F.m-2]": 0.2,
         "Negative electrode exchange-current density [A.m-2]"
@@ -330,15 +430,13 @@ def get_parameter_values():
         # positive electrode
         "Positive electrode conductivity [S.m-1]": 0.18,
         "Maximum concentration in positive electrode [mol.m-3]": 63104.0,
-        "Positive electrode diffusivity [m2.s-1]": 4e-15,
+        "Positive electrode diffusivity [m2.s-1]": NMC811_DiffKoeffi_BA_RasmusBewer_Au1, # Chen2020 constant at 4e-15 NMC811_DiffKoeffi_BA_RasmusBewer_Li
         "Positive electrode OCP [V]": nmc_LGM50_ocp_Chen2020,
         "Positive electrode porosity": 0.335,
         "Positive electrode active material volume fraction": 0.665,
         "Positive particle radius [m]": 5.22e-06,
         "Positive electrode Bruggeman coefficient (electrolyte)": 1.5,
-        "Positive electrode Bruggeman coefficient (electrode)": 1.5,
-        "Positive electrode cation signed stoichiometry": -1.0,
-        "Positive electrode electrons in reaction": 1.0,
+        "Positive electrode Bruggeman coefficient (electrode)": 0,
         "Positive electrode charge transfer coefficient": 0.5,
         "Positive electrode double-layer capacity [F.m-2]": 0.2,
         "Positive electrode exchange-current density [A.m-2]"
@@ -354,10 +452,9 @@ def get_parameter_values():
         "Separator specific heat capacity [J.kg-1.K-1]": 700.0,
         "Separator thermal conductivity [W.m-1.K-1]": 0.16,
         # electrolyte
-        "Typical electrolyte concentration [mol.m-3]": 1000.0,
         "Initial concentration in electrolyte [mol.m-3]": 1000.0,
         "Cation transference number": 0.2594,
-        "1 + dlnf/dlnc": 1.0,
+        "Thermodynamic factor": 1.0,
         "Electrolyte diffusivity [m2.s-1]": electrolyte_diffusivity_Nyman2008,
         "Electrolyte conductivity [S.m-1]": electrolyte_conductivity_Nyman2008,
         # experiment
@@ -366,8 +463,10 @@ def get_parameter_values():
         "Ambient temperature [K]": 298.15,
         "Number of electrodes connected in parallel to make a cell": 1.0,
         "Number of cells connected in series to make a battery": 1.0,
-        "Lower voltage cut-off [V]": 2.5,
+        "Lower voltage cut-off [V]": 3.0,
         "Upper voltage cut-off [V]": 4.2,
+        "Open-circuit voltage at 0% SOC [V]": 3.0,
+        "Open-circuit voltage at 100% SOC [V]": 4.2,
         "Initial concentration in negative electrode [mol.m-3]": 29866.0,
         "Initial concentration in positive electrode [mol.m-3]": 17038.0,
         "Initial temperature [K]": 298.15,
@@ -375,8 +474,8 @@ def get_parameter_values():
         "citations": ["Chen2020"],
     }
 
-V_ini_pos=nmc_LGM50_ocp_Chen2020(0.064)
+# V_ini_pos=nmc_LGM50_ocp_Chen2020(0.064)
 
-V_ini_neg=graphite_LGM50_ocp_Chen2020(1)
-print(V_ini_pos,V_ini_neg)
+# V_ini_neg=graphite_LGM50_ocp_Chen2020(1)
+# print(V_ini_pos,V_ini_neg)
 

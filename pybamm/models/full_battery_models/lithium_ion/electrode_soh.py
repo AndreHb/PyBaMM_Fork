@@ -540,12 +540,13 @@ class ElectrodeSOHSolver:
             inputs = {"Q_n": Q_n, "Q_p": Q_p, "Q": Q}
         # Solve the model and check outputs
         sol = self.solve(inputs)
-<<<<<<< develop
-        return [sol["x_0"], sol["x_100"], sol["y_100"], sol["y_0"]]
-=======
+# <<<<<<< develop
         print(sol["x_0"],sol["x_100"])
-        return [sol[var].data[0] for var in ["x_0", "x_100", "y_100", "y_0"]]
->>>>>>> OCV curve addition
+        return [sol["x_0"], sol["x_100"], sol["y_100"], sol["y_0"]]
+# =======
+        # print(sol["x_0"],sol["x_100"])
+        # return [sol[var].data[0] for var in ["x_0", "x_100", "y_100", "y_0"]]
+# >>>>>>> OCV curve addition
 
 
 def get_initial_stoichiometries(
