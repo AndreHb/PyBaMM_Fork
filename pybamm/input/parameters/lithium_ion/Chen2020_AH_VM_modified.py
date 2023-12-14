@@ -34,9 +34,10 @@ def graphite_LGM50_ocp_Chen2020(sto):
 
     return u_eqqq
 
-def NMC811_DiffKoeffi_BA_RasmusBewer_Li(sto):
+def NMC811_DiffKoeffi_BA_RasmusBewer_Li(sto,T):
     """
     8th degree polnomial fit for GITT measurement with sucessful parameter determination in SoC range betweenn 10 and 90 %
+    This corresponds to a stochiometric range of the material from [0.142 0.684]
 
     Retrieved from charge direction of GITT technique.
 
@@ -68,7 +69,7 @@ def NMC811_DiffKoeffi_BA_RasmusBewer_Li(sto):
 
     return D_Li
 
-def NMC811_DiffKoeffi_BA_RasmusBewer_Au1(sto):
+def NMC811_DiffKoeffi_BA_RasmusBewer_Au1(sto,T):
     """
     8th degree polnomial fit for GITT measurement with sucessful parameter determination in SoC range betweenn 10 and 90 %
 
@@ -102,7 +103,7 @@ def NMC811_DiffKoeffi_BA_RasmusBewer_Au1(sto):
 
     return D_Li
 
-def NMC811_DiffKoeffi_BA_RasmusBewer_Au2(sto):
+def NMC811_DiffKoeffi_BA_RasmusBewer_Au2(sto,T):
     """
     8th degree polnomial fit for GITT measurement with sucessful parameter determination in SoC range betweenn 10 and 90 %
 
@@ -430,7 +431,7 @@ def get_parameter_values():
         # positive electrode
         "Positive electrode conductivity [S.m-1]": 0.18,
         "Maximum concentration in positive electrode [mol.m-3]": 63104.0,
-        "Positive electrode diffusivity [m2.s-1]": NMC811_DiffKoeffi_BA_RasmusBewer_Au1, # Chen2020 constant at 4e-15 NMC811_DiffKoeffi_BA_RasmusBewer_Li
+        "Positive electrode diffusivity [m2.s-1]": NMC811_DiffKoeffi_BA_RasmusBewer_Au1, # NMC811_DiffKoeffi_BA_RasmusBewer_Au1, # Chen2020 constant at 4e-15 NMC811_DiffKoeffi_BA_RasmusBewer_Li
         "Positive electrode OCP [V]": nmc_LGM50_ocp_Chen2020,
         "Positive electrode porosity": 0.335,
         "Positive electrode active material volume fraction": 0.665,
