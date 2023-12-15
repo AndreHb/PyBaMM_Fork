@@ -24,7 +24,7 @@ def graphite_LGM50_ocp_Chen2020(sto):
         Open circuit potential
     """
 
-    u_eqqq = (
+    u_eq = (
         57194.9119279 * pybamm.exp(-591.59463163221 * sto)
         + 0.8837919007067767
         - 0.7181358535* pybamm.tanh(35.60941598 * (sto - 0.017213))
@@ -32,7 +32,7 @@ def graphite_LGM50_ocp_Chen2020(sto):
         - 0.057250544 * pybamm.tanh(11.2003946103 * (sto - 0.16110909577420))
     )
 
-    return u_eqqq
+    return u_eq
 
 def NMC811_DiffKoeffi_BA_RasmusBewer_Li(sto,T):
     """
@@ -212,12 +212,26 @@ def nmc_LGM50_ocp_Chen2020(sto):
     #     + 3.489817641449543
     # )
 
+    # fit was done in correctly. 
+    # u_eq = ( 
+    #     -1.02583318170468 * pybamm.exp(-3.29273222104149 * sto)
+    #     + 3.62480991176346
+    #     - 0.175189948055655 * pybamm.tanh(8 * (sto + 2))
+    #     - 1.03071298522941 * pybamm.tanh(3.20197155934937 * (sto - 0.126648381506623))
+    #     -1.37758874029945 * pybamm.tanh(3.66561441475660 * (sto - 1.09106043792285))
+    # )
+
+    # accurate polynomical fit with extrapolation points to limit errors due small extrapolation
     u_eq = (
-        -1.02583318170468 * pybamm.exp(-3.29273222104149 * sto)
-        + 3.62480991176346
-        - 0.175189948055655 * pybamm.tanh(8 * (sto + 2))
-        - 1.03071298522941 * pybamm.tanh(3.20197155934937 * (sto - 0.126648381506623))
-        -1.37758874029945 * pybamm.tanh(3.66561441475660 * (sto - 1.09106043792285))
+        - 3.922450690509036e+03 * sto**8
+        + 1.425016457066832e+04 * sto**7
+        - 2.172335251120002e+04 * sto**6
+        + 1.806465191496407e+04 * sto**5
+        - 8.928062261796630e+03 * sto**4
+        + 2.679755766826636e+03 * sto**3
+        - 4.763955221149448e+02 * sto**2
+        + 44.479420547742215 * sto
+        + 2.552594308455391
     )
 
     return u_eq
@@ -431,7 +445,7 @@ def get_parameter_values():
         # positive electrode
         "Positive electrode conductivity [S.m-1]": 0.18,
         "Maximum concentration in positive electrode [mol.m-3]": 63104.0,
-        "Positive electrode diffusivity [m2.s-1]": NMC811_DiffKoeffi_BA_RasmusBewer_Au1, # NMC811_DiffKoeffi_BA_RasmusBewer_Au1, # Chen2020 constant at 4e-15 NMC811_DiffKoeffi_BA_RasmusBewer_Li
+        "Positive electrode diffusivity [m2.s-1]": 4e-15, #NMC811_DiffKoeffi_BA_RasmusBewer_Au1, # NMC811_DiffKoeffi_BA_RasmusBewer_Au1, # Chen2020 constant at 4e-15 NMC811_DiffKoeffi_BA_RasmusBewer_Li
         "Positive electrode OCP [V]": nmc_LGM50_ocp_Chen2020,
         "Positive electrode porosity": 0.335,
         "Positive electrode active material volume fraction": 0.665,
