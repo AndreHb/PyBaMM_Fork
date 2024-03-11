@@ -24,12 +24,22 @@ def graphite_LGM50_ocp_Chen2020(sto):
         Open circuit potential
     """
 
+    # u_eq = (
+    #     57194.9119279 * pybamm.exp(-591.59463163221 * sto)
+    #     + 0.8837919007067767
+    #     - 0.7181358535* pybamm.tanh(35.60941598 * (sto - 0.017213))
+    #     - 0.01926420 * pybamm.tanh(21.10531107 * (sto - 0.516856234))
+    #     - 0.057250544 * pybamm.tanh(11.2003946103 * (sto - 0.16110909577420))
+    # )
+
+    #Result from mapping of HC features on FC data and to determine sto range
+    #x-range: 0.0320 to 0.885 (extended to get right capacity)
     u_eq = (
-        57194.9119279 * pybamm.exp(-591.59463163221 * sto)
-        + 0.8837919007067767
-        - 0.7181358535* pybamm.tanh(35.60941598 * (sto - 0.017213))
-        - 0.01926420 * pybamm.tanh(21.10531107 * (sto - 0.516856234))
-        - 0.057250544 * pybamm.tanh(11.2003946103 * (sto - 0.16110909577420))
+        1.110218413725510 * pybamm.exp(-75.516461602271760 * sto)
+        + 0.147841727791915
+        - 7.664571570599029e-05* pybamm.tanh(15.146171864949494 * (sto - 0.937038166931668))
+        - 0.042765300282118 * pybamm.tanh(23.425076882458310 * (sto - 0.153274739170637))
+        - 0.020449578603550 * pybamm.tanh(38.137812807891820 * (sto - 0.459953786691162))
     )
 
     return u_eq
@@ -221,17 +231,34 @@ def nmc_LGM50_ocp_Chen2020(sto):
     #     -1.37758874029945 * pybamm.tanh(3.66561441475660 * (sto - 1.09106043792285))
     # )
 
+    # polynomical fit with extrapolation points to limit errors due small extrapolation
+    # x-range: 0.128 to 0.741
+    # The fit is not steep enough at the edges like in Chen, so that the model finds other solutions
+    # u_eq = (
+    #     - 3.922450690509036e+03 * sto**8
+    #     + 1.425016457066832e+04 * sto**7
+    #     - 2.172335251120002e+04 * sto**6
+    #     + 1.806465191496407e+04 * sto**5
+    #     - 8.928062261796630e+03 * sto**4
+    #     + 2.679755766826636e+03 * sto**3
+    #     - 4.763955221149448e+02 * sto**2
+    #     + 44.479420547742215 * sto
+    #     + 2.552594308455391
+    # )
+
     # accurate polynomical fit with extrapolation points to limit errors due small extrapolation
+    # x-range: 0.128 to 0.741
     u_eq = (
-        - 3.922450690509036e+03 * sto**8
-        + 1.425016457066832e+04 * sto**7
-        - 2.172335251120002e+04 * sto**6
-        + 1.806465191496407e+04 * sto**5
-        - 8.928062261796630e+03 * sto**4
-        + 2.679755766826636e+03 * sto**3
-        - 4.763955221149448e+02 * sto**2
-        + 44.479420547742215 * sto
-        + 2.552594308455391
+        - 1.043048142343884e+04 * sto**9
+        + 4.962669673525584e+04 * sto**8
+        - 1.018714014435327e+05 * sto**7
+        + 1.181473040728662e+05 * sto**6
+        - 8.512801221395213e+04 * sto**5
+        + 3.943050938308326e+04 * sto**4
+        - 1.171024602277544e+04 * sto**3
+        + 2.142589509608000e+03 * sto**2
+        - 2.193442437976997e+02 * sto
+        + 13.871365583439971
     )
 
     return u_eq
