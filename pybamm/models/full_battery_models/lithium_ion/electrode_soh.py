@@ -816,15 +816,6 @@ class ElectrodeSOHSolver:
             inputs = {"Q_n": Q_n, "Q_p": Q_p, "Q": Q}
         # Solve the model and check outputs
         sol = self.solve(inputs)
-<<<<<<< HEAD
-# <<<<<<< develop
-        print(sol["x_0"],sol["x_100"])
-        return [sol["x_0"], sol["x_100"], sol["y_100"], sol["y_0"]]
-# =======
-        # print(sol["x_0"],sol["x_100"])
-        # return [sol[var].data[0] for var in ["x_0", "x_100", "y_100", "y_0"]]
-# >>>>>>> OCV curve addition
-=======
         return [sol["Un(x_0)"], sol["Un(x_100)"], sol["Up(y_100)"], sol["Up(y_0)"]]
 
     def theoretical_energy_integral(self, inputs, points=1000):
@@ -847,7 +838,6 @@ class ElectrodeSOHSolver:
         # Integrate and convert to W-h
         E = np.trapz(Vs, dx=dQ)
         return E
->>>>>>> 6c1a5598d2dbfa9e899f74174ab830d39faf76c0
 
 
 def get_initial_stoichiometries(
