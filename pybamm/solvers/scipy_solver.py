@@ -23,8 +23,9 @@ class ScipySolver(pybamm.BaseSolver):
         The tolerance to assert whether extrapolation occurs or not (default is 0).
     extra_options : dict, optional
         Any options to pass to the solver.
-        Please consult `SciPy documentation <https://tinyurl.com/yafgqg9y>`_ for
-        details.
+        Please consult `SciPy documentation
+        <https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html>`_
+        for details.
     """
 
     def __init__(
@@ -43,7 +44,7 @@ class ScipySolver(pybamm.BaseSolver):
         )
         self.ode_solver = True
         self.extra_options = extra_options or {}
-        self.name = "Scipy solver ({})".format(method)
+        self.name = f"Scipy solver ({method})"
         pybamm.citations.register("Virtanen2020")
 
     def _integrate(self, model, t_eval, inputs_dict=None):
@@ -123,7 +124,7 @@ class ScipySolver(pybamm.BaseSolver):
             t_eval=t_eval,
             method=self.method,
             dense_output=True,
-            **extra_options
+            **extra_options,
         )
         integration_time = timer.time()
 

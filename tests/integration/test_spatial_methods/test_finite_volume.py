@@ -294,6 +294,100 @@ class TestFiniteVolumeConvergence(TestCase):
         np.testing.assert_array_less(1.99 * np.ones_like(rates), rates)
 
 
+def solve_laplace_equation(coord_sys="cartesian"):
+    model = pybamm.BaseModel()
+    r = pybamm.SpatialVariable("r", domain="domain", coord_sys=coord_sys)
+    u = pybamm.Variable("u", domain="domain")
+    del_u = pybamm.div(pybamm.grad(u))
+    model.boundary_conditions = {
+        u: {
+            "left": (pybamm.Scalar(0), "Dirichlet"),
+            "right": (pybamm.Scalar(1), "Dirichlet"),
+        }
+    }
+    model.algebraic = {u: del_u}
+    model.initial_conditions = {u: pybamm.Scalar(0)}
+    model.variables = {"u": u, "r": r}
+    geometry = {"domain": {r: {"min": pybamm.Scalar(1), "max": pybamm.Scalar(2)}}}
+    submesh_types = {"domain": pybamm.Uniform1DSubMesh}
+    var_pts = {r: 500}
+    mesh = pybamm.Mesh(geometry, submesh_types, var_pts)
+    spatial_methods = {"domain": pybamm.FiniteVolume()}
+    disc = pybamm.Discretisation(mesh, spatial_methods)
+    disc.process_model(model)
+    solver = pybamm.CasadiAlgebraicSolver()
+    return solver.solve(model)
+
+
+class TestFiniteVolumeLaplacian(TestCase):
+    def test_laplacian_cartesian(self):
+        solution = solve_laplace_equation(coord_sys="cartesian")
+        np.testing.assert_array_almost_equal(
+            solution["u"].entries, solution["r"].entries - 1, decimal=10
+        )
+
+    def test_laplacian_cylindrical(self):
+        solution = solve_laplace_equation(coord_sys="cylindrical polar")
+        np.testing.assert_array_almost_equal(
+            solution["u"].entries, np.log(solution["r"].entries) / np.log(2), decimal=5
+        )
+
+    def test_laplacian_spherical(self):
+        solution = solve_laplace_equation(coord_sys="spherical polar")
+        np.testing.assert_array_almost_equal(
+            solution["u"].entries, 2 - 2 / solution["r"].entries, decimal=5
+        )
+
+
+def solve_advection_equation(direction="upwind", source=1, bc=0):
+    model = pybamm.BaseModel()
+    x = pybamm.SpatialVariable("x", domain="domain", coord_sys="cartesian")
+    u = pybamm.Variable("u", domain="domain")
+    if direction == "upwind":
+        bc_side = "left"
+        y = x
+        v = pybamm.PrimaryBroadcastToEdges(1, ["domain"])
+        rhs = -pybamm.div(pybamm.upwind(u) * v) + source
+    elif direction == "downwind":
+        bc_side = "right"
+        y = 1 - x
+        v = pybamm.PrimaryBroadcastToEdges(-1, ["domain"])
+        rhs = -pybamm.div(pybamm.downwind(u) * v) + source
+
+    u_an = (bc + source * y) - (bc + source * (y - pybamm.t)) * ((y - pybamm.t) > 0)
+    model.boundary_conditions = {
+        u: {
+            bc_side: (pybamm.Scalar(bc), "Dirichlet"),
+        }
+    }
+    model.rhs = {u: rhs}
+    model.initial_conditions = {u: pybamm.Scalar(0)}
+    model.variables = {"u": u, "x": x, "analytical": u_an}
+    geometry = {"domain": {x: {"min": pybamm.Scalar(0), "max": pybamm.Scalar(1)}}}
+    submesh_types = {"domain": pybamm.Uniform1DSubMesh}
+    var_pts = {x: 1000}
+    mesh = pybamm.Mesh(geometry, submesh_types, var_pts)
+    spatial_methods = {"domain": pybamm.FiniteVolume()}
+    disc = pybamm.Discretisation(mesh, spatial_methods)
+    disc.process_model(model)
+    solver = pybamm.CasadiSolver()
+    return solver.solve(model, [0, 1])
+
+
+class TestUpwindDownwind(TestCase):
+    def test_upwind(self):
+        solution = solve_advection_equation("upwind")
+        np.testing.assert_array_almost_equal(
+            solution["u"].entries, solution["analytical"].entries, decimal=2
+        )
+
+    def test_downwind(self):
+        solution = solve_advection_equation("downwind")
+        np.testing.assert_array_almost_equal(
+            solution["u"].entries, solution["analytical"].entries, decimal=2
+        )
+
+
 if __name__ == "__main__":
     print("Add -v for more debug output")
     import sys

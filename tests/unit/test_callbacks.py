@@ -63,9 +63,9 @@ class TestCallbacks(TestCase):
             ]
         )
         callback.on_experiment_end(None)
-        with open("test_callback.log", "r") as f:
+        with open("test_callback.log") as f:
             self.assertEqual(f.read(), "first\n")
-        with open("test_callback_2.log", "r") as f:
+        with open("test_callback_2.log") as f:
             self.assertEqual(f.read(), "second\n")
 
     def test_logging_callback(self):
@@ -81,6 +81,7 @@ class TestCallbacks(TestCase):
             "cycle number": (5, 12),
             "step number": (1, 4),
             "elapsed time": 0.45,
+            "step duration": 1,
             "step operating conditions": "Charge",
             "termination": "event",
         }
@@ -89,19 +90,23 @@ class TestCallbacks(TestCase):
             self.assertEqual(f.read(), "")
 
         callback.on_cycle_start(logs)
-        with open("test_callback.log", "r") as f:
+        with open("test_callback.log") as f:
             self.assertIn("Cycle 5/12", f.read())
 
         callback.on_step_start(logs)
-        with open("test_callback.log", "r") as f:
+        with open("test_callback.log") as f:
             self.assertIn("Cycle 5/12, step 1/4", f.read())
 
-        callback.on_experiment_infeasible(logs)
-        with open("test_callback.log", "r") as f:
+        callback.on_experiment_infeasible_event(logs)
+        with open("test_callback.log") as f:
             self.assertIn("Experiment is infeasible: 'event'", f.read())
 
+        callback.on_experiment_infeasible_time(logs)
+        with open("test_callback.log") as f:
+            self.assertIn("Experiment is infeasible: default duration", f.read())
+
         callback.on_experiment_end(logs)
-        with open("test_callback.log", "r") as f:
+        with open("test_callback.log") as f:
             self.assertIn("took 0.45", f.read())
 
         # Calling start again should clear the log

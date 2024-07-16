@@ -6,7 +6,8 @@ import pybamm
 from scipy.sparse import csr_matrix, csc_matrix
 from scipy.sparse.linalg import inv
 import numpy as np
-import skfem
+
+from pybamm.util import import_optional_dependency
 
 
 class ScikitFiniteElement(pybamm.SpatialMethod):
@@ -17,12 +18,7 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
     solving the Poisson problem -grad^2 u = f in the y-z plane (i.e. not the
     through-cell direction).
 
-    For broadcast we follow the default behaviour from SpatialMethod.
-
-    Parameters
-    ----------
-    mesh : :class:`pybamm.Mesh`
-        Contains all the submeshes for discretisation
+    For broadcast, we follow the default behaviour from SpatialMethod.
     """
 
     def __init__(self, options=None):
@@ -52,18 +48,15 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
         """
         symbol_mesh = self.mesh
         if symbol.name == "y":
-            vector = pybamm.Vector(
-                symbol_mesh["current collector"].coordinates[0, :][:, np.newaxis]
-            )
+            entries = symbol_mesh["current collector"].coordinates[0, :][:, np.newaxis]
+
         elif symbol.name == "z":
-            vector = pybamm.Vector(
-                symbol_mesh["current collector"].coordinates[1, :][:, np.newaxis]
-            )
+            entries = symbol_mesh["current collector"].coordinates[1, :][:, np.newaxis]
         else:
             raise pybamm.GeometryError(
-                "Spatial variable must be 'y' or 'z' not {}".format(symbol.name)
+                f"Spatial variable must be 'y' or 'z' not {symbol.name}"
             )
-        return vector
+        return pybamm.Vector(entries, domains=symbol.domains)
 
     def gradient(self, symbol, discretised_symbol, boundary_conditions):
         """Matrix-vector multiplication to implement the gradient operator. The
@@ -90,6 +83,7 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
             to the y-component of the gradient and the second column corresponds
             to the z component of the gradient.
         """
+        skfem = import_optional_dependency("skfem")
         domain = symbol.domain[0]
         mesh = self.mesh[domain]
 
@@ -145,6 +139,7 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
         :class:`pybamm.Matrix`
             The (sparse) finite element gradient matrix for the domain
         """
+        skfem = import_optional_dependency("skfem")
         # get primary domain mesh
         domain = symbol.domain[0]
         mesh = self.mesh[domain]
@@ -190,6 +185,7 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
             Contains the result of acting the discretised gradient on
             the child discretised_symbol
         """
+        skfem = import_optional_dependency("skfem")
         domain = symbol.domain[0]
         mesh = self.mesh[domain]
 
@@ -220,9 +216,7 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
             boundary_load = boundary_load + neg_bc_value * pybamm.Vector(neg_bc_load)
         else:
             raise ValueError(
-                "boundary condition must be Dirichlet or Neumann, not '{}'".format(
-                    neg_bc_type
-                )
+                f"boundary condition must be Dirichlet or Neumann, not '{neg_bc_type}'"
             )
 
         if pos_bc_type == "Neumann":
@@ -237,9 +231,7 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
             boundary_load = boundary_load + pos_bc_value * pybamm.Vector(pos_bc_load)
         else:
             raise ValueError(
-                "boundary condition must be Dirichlet or Neumann, not '{}'".format(
-                    pos_bc_type
-                )
+                f"boundary condition must be Dirichlet or Neumann, not '{pos_bc_type}'"
             )
 
         return -stiffness_matrix @ discretised_symbol + boundary_load
@@ -261,6 +253,7 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
         :class:`pybamm.Matrix`
             The (sparse) finite element stiffness matrix for the domain
         """
+        skfem = import_optional_dependency("skfem")
         # get primary domain mesh
         domain = symbol.domain[0]
         mesh = self.mesh[domain]
@@ -277,10 +270,10 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
         try:
             _, neg_bc_type = boundary_conditions[symbol]["negative tab"]
             _, pos_bc_type = boundary_conditions[symbol]["positive tab"]
-        except KeyError:
+        except KeyError as error:
             raise pybamm.ModelError(
-                "No boundary conditions provided for symbol `{}``".format(symbol)
-            )
+                f"No boundary conditions provided for symbol `{symbol}``"
+            ) from error
 
         # adjust matrix for Dirichlet boundary conditions
         if neg_bc_type == "Dirichlet":
@@ -307,9 +300,9 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
         the entire domain
 
         .. math::
-            I = \\int_{\Omega}\\!f(s)\\,dx
+            I = \\int_{\\Omega}\\!f(s)\\,dx
 
-        for where :math:`\Omega` is the domain.
+        for where :math:`\\Omega` is the domain.
 
         Parameters
         ----------
@@ -323,6 +316,7 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
         :class:`pybamm.Matrix`
             The finite element integral vector for the domain
         """
+        skfem = import_optional_dependency("skfem")
         # get primary domain mesh
         domain = child.domain[0]
         mesh = self.mesh[domain]
@@ -384,6 +378,7 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
         :class:`pybamm.Matrix`
             The finite element integral vector for the domain
         """
+        skfem = import_optional_dependency("skfem")
         # get primary domain mesh
         mesh = self.mesh[domain[0]]
 
@@ -501,6 +496,7 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
         :class:`pybamm.Matrix`
             The (sparse) mass matrix for the spatial method.
         """
+        skfem = import_optional_dependency("skfem")
         # get primary domain mesh
         domain = symbol.domain[0]
         mesh = self.mesh[domain]
@@ -532,14 +528,14 @@ class ScikitFiniteElement(pybamm.SpatialMethod):
 
     def bc_apply(self, M, boundary, zero=False):
         """
-        Adjusts the assemled finite element matrices to account for boundary conditons.
+        Adjusts the assembled finite element matrices to account for boundary conditions.
 
         Parameters
         ----------
         M: :class:`scipy.sparse.coo_matrix`
-            The assemled finite element matrix to adjust.
+            The assembled finite element matrix to adjust.
         boundary: :class:`numpy.array`
-            Array of the indicies which correspond to the boundary.
+            Array of the indices which correspond to the boundary.
         zero: bool, optional
             If True, the rows of M given by the indicies in boundary are set to zero.
             If False, the diagonal element is set to one. default is False.

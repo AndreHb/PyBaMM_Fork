@@ -10,10 +10,6 @@ from scipy.sparse import eye
 from tests import get_mesh_for_testing
 
 
-def test_multi_var_function(arg1, arg2):
-    return arg1 + arg2
-
-
 class TestJacobian(TestCase):
     def test_variable_is_statevector(self):
         a = pybamm.Symbol("a")
@@ -77,9 +73,7 @@ class TestJacobian(TestCase):
         np.testing.assert_array_equal(jacobian, dfunc_dy.toarray())
 
         func = 2**v
-        jacobian = np.array(
-            [[0, 0, 2**3 * np.log(2), 0], [0, 0, 0, 2**4 * np.log(2)]]
-        )
+        jacobian = np.array([[0, 0, 2**3 * np.log(2), 0], [0, 0, 0, 2**4 * np.log(2)]])
         dfunc_dy = func.jac(y).evaluate(y=y0)
         np.testing.assert_array_equal(jacobian, dfunc_dy.toarray())
 
@@ -218,12 +212,6 @@ class TestJacobian(TestCase):
         dfunc_dy = func.jac(y).evaluate(y=y0)
         np.testing.assert_array_equal(0, dfunc_dy)
 
-        # several children
-        func = pybamm.Function(test_multi_var_function, 2 * y, 3 * y)
-        jacobian = np.diag(5 * np.ones(4))
-        dfunc_dy = func.jac(y).evaluate(y=y0)
-        np.testing.assert_array_equal(jacobian, dfunc_dy.toarray())
-
     def test_index(self):
         vec = pybamm.StateVector(slice(0, 5))
         ind = pybamm.Index(vec, 3)
@@ -235,6 +223,12 @@ class TestJacobian(TestCase):
         ind = pybamm.Index(const_vec, 2)
         jac = ind.jac(vec).evaluate(y=np.linspace(0, 2, 5)).toarray()
         np.testing.assert_array_equal(jac, np.array([[0, 0, 0, 0, 0]]))
+
+    def test_evaluate_at(self):
+        y = pybamm.StateVector(slice(0, 4))
+        expr = pybamm.EvaluateAt(y, 2)
+        jac = expr.jac(y).evaluate(y=np.linspace(0, 2, 4))
+        np.testing.assert_array_equal(jac, 0)
 
     def test_jac_of_number(self):
         """Jacobian of a number should be zero"""

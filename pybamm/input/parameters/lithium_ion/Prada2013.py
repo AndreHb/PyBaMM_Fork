@@ -1,4 +1,5 @@
 import pybamm
+import numpy as np
 
 
 def graphite_LGM50_ocp_Chen2020(sto):
@@ -25,11 +26,11 @@ def graphite_LGM50_ocp_Chen2020(sto):
     """
 
     u_eq = (
-        1.9793 * pybamm.exp(-39.3631 * sto)
+        1.9793 * np.exp(-39.3631 * sto)
         + 0.2482
-        - 0.0909 * pybamm.tanh(29.8538 * (sto - 0.1234))
-        - 0.04478 * pybamm.tanh(14.9159 * (sto - 0.2769))
-        - 0.0205 * pybamm.tanh(30.4444 * (sto - 0.6103))
+        - 0.0909 * np.tanh(29.8538 * (sto - 0.1234))
+        - 0.04478 * np.tanh(14.9159 * (sto - 0.2769))
+        - 0.0205 * np.tanh(30.4444 * (sto - 0.6103))
     )
 
     return u_eq
@@ -67,11 +68,9 @@ def graphite_LGM50_electrolyte_exchange_current_density_Chen2020(
     """
     m_ref = 6.48e-7  # (A/m2)(m3/mol)**1.5 - includes ref concentrations
     E_r = 35000
-    arrhenius = pybamm.exp(E_r / pybamm.constants.R * (1 / 298.15 - 1 / T))
+    arrhenius = np.exp(E_r / pybamm.constants.R * (1 / 298.15 - 1 / T))
 
-    return (
-        m_ref * arrhenius * c_e**0.5 * c_s_surf**0.5 * (c_s_max - c_s_surf) ** 0.5
-    )
+    return m_ref * arrhenius * c_e**0.5 * c_s_surf**0.5 * (c_s_max - c_s_surf) ** 0.5
 
 
 def LFP_ocp_Afshar2017(sto):
@@ -93,7 +92,7 @@ def LFP_ocp_Afshar2017(sto):
 
     c1 = -150 * sto
     c2 = -30 * (1 - sto)
-    k = 3.4077 - 0.020269 * sto + 0.5 * pybamm.exp(c1) - 0.9 * pybamm.exp(c2)
+    k = 3.4077 - 0.020269 * sto + 0.5 * np.exp(c1) - 0.9 * np.exp(c2)
 
     return k
 
@@ -128,11 +127,9 @@ def LFP_electrolyte_exchange_current_density_kashkooli2017(c_e, c_s_surf, c_s_ma
 
     m_ref = 6 * 10 ** (-7)  # (A/m2)(m3/mol)**1.5 - includes ref concentrations
     E_r = 39570
-    arrhenius = pybamm.exp(E_r / pybamm.constants.R * (1 / 298.15 - 1 / T))
+    arrhenius = np.exp(E_r / pybamm.constants.R * (1 / 298.15 - 1 / T))
 
-    return (
-        m_ref * arrhenius * c_e**0.5 * c_s_surf**0.5 * (c_s_max - c_s_surf) ** 0.5
-    )
+    return m_ref * arrhenius * c_e**0.5 * c_s_surf**0.5 * (c_s_max - c_s_surf) ** 0.5
 
 
 def electrolyte_conductivity_Prada2013(c_e, T):
@@ -186,7 +183,7 @@ def get_parameter_values():
         # negative electrode
         "Negative electrode conductivity [S.m-1]": 215.0,
         "Maximum concentration in negative electrode [mol.m-3]": 30555,
-        "Negative electrode diffusivity [m2.s-1]": 3e-15,
+        "Negative particle diffusivity [m2.s-1]": 3e-15,
         "Negative electrode OCP [V]": graphite_LGM50_ocp_Chen2020,
         "Negative electrode porosity": 0.36,
         "Negative electrode active material volume fraction": 0.58,
@@ -201,7 +198,7 @@ def get_parameter_values():
         # positive electrode
         "Positive electrode conductivity [S.m-1]": 0.33795074,
         "Maximum concentration in positive electrode [mol.m-3]": 22806.0,
-        "Positive electrode diffusivity [m2.s-1]": 5.9e-18,
+        "Positive particle diffusivity [m2.s-1]": 5.9e-18,
         "Positive electrode OCP [V]": LFP_ocp_Afshar2017,
         "Positive electrode porosity": 0.426,
         "Positive electrode active material volume fraction": 0.374,

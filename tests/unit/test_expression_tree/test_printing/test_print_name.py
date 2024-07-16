@@ -1,6 +1,7 @@
 """
 Tests for the print_name.py
 """
+
 from tests import TestCase
 import unittest
 
@@ -21,7 +22,7 @@ class TestPrintName(TestCase):
         )
 
         # Test subscripts
-        self.assertEqual(param.n.C_dl.print_name, r"C_{\mathrm{dl,n}}")
+        self.assertEqual(param.n.C_dl(0).print_name, r"C_{\mathrm{dl,n}}")
 
         # Test bar
         c_e_av = pybamm.Variable("c_e_av")
@@ -31,9 +32,9 @@ class TestPrintName(TestCase):
         # Test greek letters
         self.assertEqual(param2.delta.print_name, r"\delta")
 
-        # Test new_copy()
+        # Test create_copy()
         a_n = param2.n.prim.a
-        a_n.new_copy()
+        self.assertEqual(a_n.create_copy().print_name, r"a_{\mathrm{n}}")
 
         # Test eps
         eps_n = pybamm.Variable("eps_n")

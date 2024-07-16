@@ -50,13 +50,13 @@ class TestCitations(unittest.TestCase):
         # Text Style
         with temporary_filename() as filename:
             pybamm.print_citations(filename, "text")
-            with open(filename, "r") as f:
+            with open(filename) as f:
                 self.assertTrue(len(f.readlines()) > 0)
 
         # Bibtext Style
         with temporary_filename() as filename:
             pybamm.print_citations(filename, "bibtex")
-            with open(filename, "r") as f:
+            with open(filename) as f:
                 self.assertTrue(len(f.readlines()) > 0)
 
         # Write to stdout
@@ -69,11 +69,6 @@ class TestCitations(unittest.TestCase):
 
         with self.assertRaisesRegex(pybamm.OptionError, "'text' or 'bibtex'"):
             pybamm.print_citations("test_citations.txt", "bad format")
-
-        pybamm.citations._citation_err_msg = "Error"
-        with self.assertRaisesRegex(ImportError, "Error"):
-            pybamm.print_citations()
-        pybamm.citations._citation_err_msg = None
 
         # Test that unknown citation raises warning message on printing
         pybamm.citations._reset()
@@ -101,7 +96,7 @@ class TestCitations(unittest.TestCase):
             pybamm.citations.register(r"@article{NotACitation, title = {A New Title}}")
             pybamm.citations._parse_citation(
                 r"@article{NotACitation, title = {A New Title}}"
-            )  # noqa: E501
+            )
         self.assertIn("NotACitation", pybamm.citations._papers_to_cite)
         self.assertNotEqual(
             pybamm.citations._all_citations["NotACitation"], old_citation
@@ -206,7 +201,7 @@ class TestCitations(unittest.TestCase):
 
         citations._reset()
         self.assertNotIn("Timms2021", citations._papers_to_cite)
-        pybamm.thermal.OneDimensionalX(param=None)
+        pybamm.thermal.pouch_cell.OneDimensionalX(param=None)
         self.assertIn("Timms2021", citations._papers_to_cite)
         self.assertIn("Timms2021", citations._citation_tags.keys())
 
@@ -338,6 +333,18 @@ class TestCitations(unittest.TestCase):
         self.assertIn("Sripad2020", citations._papers_to_cite)
         self.assertIn("Sripad2020", citations._citation_tags.keys())
 
+    def test_msmr(self):
+        citations = pybamm.citations
+
+        citations._reset()
+        self.assertNotIn("Baker2018", citations._papers_to_cite)
+        self.assertNotIn("Verbrugge2017", citations._papers_to_cite)
+        pybamm.particle.MSMRDiffusion(None, "negative", None, None, None)
+        self.assertIn("Baker2018", citations._papers_to_cite)
+        self.assertIn("Baker2018", citations._citation_tags.keys())
+        self.assertIn("Verbrugge2017", citations._papers_to_cite)
+        self.assertIn("Verbrugge2017", citations._citation_tags.keys())
+
     def test_parameter_citations(self):
         citations = pybamm.citations
 
@@ -379,6 +386,13 @@ class TestCitations(unittest.TestCase):
         self.assertIn("ORegan2022", citations._papers_to_cite)
         self.assertIn("ORegan2022", citations._citation_tags.keys())
 
+        citations._reset()
+        pybamm.ParameterValues("MSMR_Example")
+        self.assertIn("Baker2018", citations._papers_to_cite)
+        self.assertIn("Baker2018", citations._citation_tags.keys())
+        self.assertIn("Verbrugge2017", citations._papers_to_cite)
+        self.assertIn("Verbrugge2017", citations._citation_tags.keys())
+
     def test_solver_citations(self):
         # Test that solving each solver adds the right citations
         citations = pybamm.citations
@@ -394,19 +408,6 @@ class TestCitations(unittest.TestCase):
         pybamm.AlgebraicSolver()
         self.assertIn("Virtanen2020", citations._papers_to_cite)
         self.assertIn("Virtanen2020", citations._citation_tags.keys())
-
-        if pybamm.have_scikits_odes():
-            citations._reset()
-            self.assertNotIn("Malengier2018", citations._papers_to_cite)
-            pybamm.ScikitsOdeSolver()
-            self.assertIn("Malengier2018", citations._papers_to_cite)
-            self.assertIn("Malengier2018", citations._citation_tags.keys())
-
-            citations._reset()
-            self.assertNotIn("Malengier2018", citations._papers_to_cite)
-            pybamm.ScikitsDaeSolver()
-            self.assertIn("Malengier2018", citations._papers_to_cite)
-            self.assertIn("Malengier2018", citations._citation_tags.keys())
 
         if pybamm.have_idaklu():
             citations._reset()
