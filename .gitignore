@@ -17,6 +17,8 @@
 !src/pybamm/CITATIONS.bib
 !src/pybamm/input/**/*.csv
 !tests/unit/test_parameters/*.csv
+!scripts/testing/*.csv
+!scripts/testing/*.txt
 !benchmarks/benchmark_images/*.png
 
 # running files
