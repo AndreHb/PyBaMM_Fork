@@ -148,7 +148,7 @@ def NMC811_DiffKoeffi_BA_RasmusBewer_Au2(sto,T):
     return D_Li
 
 
-def graphite_LGM50_electrolyte_exchange_current_density_Chen2020(
+def graphite_exchange_current_density_CircularLIB(
     c_e, c_s_surf, c_s_max, T
 ):
     """
@@ -178,8 +178,10 @@ def graphite_LGM50_electrolyte_exchange_current_density_Chen2020(
     :class:`pybamm.Symbol`
         Exchange-current density [A.m-2]
     """
-    m_ref = 6.48e-7  # (A/m2)(m3/mol)**1.5 - includes ref concentrations
-    E_r = 35000
+    k=1.44832e-8
+    m_ref = k*pybamm.constants.F/1000**0.5
+    # m_ref = 6.48e-7  # (A/m2)(m3/mol)**1.5 - includes ref concentrations
+    E_r = 53400
     arrhenius = np.exp(E_r / pybamm.constants.R * (1 / 298.15 - 1 / T))
 
     return (
@@ -209,45 +211,23 @@ def nmc_LGM50_ocp_Chen2020(sto):
     :class:`pybamm.Symbol`
         Open circuit potential
     """
-    # tried polynomfit - extrapolation went to far off
-    # u_eq = (
-    #     - 4.399785836560637e+03 * sto**8
-    #     + 1.477519507637824e+04 * sto**7
-    #     - 2.069917513956780e+04 * sto**6
-    #     + 1.570547118537844e+04 * sto**5
-    #     - 7.020807789622281e+03 * sto**4
-    #     + 1.886330365579380e+03 * sto**3
-    #     - 2.960973135106860e+02 * sto**2
-    #     + 23.335819747012845 * sto
-    #     + 3.489817641449543
-    # )
-
-    # fit was done in correctly. 
-    # u_eq = ( 
-    #     -1.02583318170468 * np.exp(-3.29273222104149 * sto)
-    #     + 3.62480991176346
-    #     - 0.175189948055655 * np.tanh(8 * (sto + 2))
-    #     - 1.03071298522941 * np.tanh(3.20197155934937 * (sto - 0.126648381506623))
-    #     -1.37758874029945 * np.tanh(3.66561441475660 * (sto - 1.09106043792285))
-    # )
-
-    # polynomical fit with extrapolation points to limit errors due small extrapolation
-    # x-range: 0.128 to 0.741
-    # The fit is not steep enough at the edges like in Chen, so that the model finds other solutions
-    # u_eq = (
-    #     - 3.922450690509036e+03 * sto**8
-    #     + 1.425016457066832e+04 * sto**7
-    #     - 2.172335251120002e+04 * sto**6
-    #     + 1.806465191496407e+04 * sto**5
-    #     - 8.928062261796630e+03 * sto**4
-    #     + 2.679755766826636e+03 * sto**3
-    #     - 4.763955221149448e+02 * sto**2
-    #     + 44.479420547742215 * sto
-    #     + 2.552594308455391
-    # )
 
     # accurate polynomical fit with extrapolation points to limit errors due small extrapolation
-    # x-range: 0.128 to 0.741
+    # x-range: 0.128 to 0.741 - custom cell material
+    # u_eq = (
+    #     - 1.043048142343884e+04 * sto**9
+    #     + 4.962669673525584e+04 * sto**8
+    #     - 1.018714014435327e+05 * sto**7
+    #     + 1.181473040728662e+05 * sto**6
+    #     - 8.512801221395213e+04 * sto**5
+    #     + 3.943050938308326e+04 * sto**4
+    #     - 1.171024602277544e+04 * sto**3
+    #     + 2.142589509608000e+03 * sto**2
+    #     - 2.193442437976997e+02 * sto
+    #     + 13.871365583439971
+    # )
+
+    # CircularLIB Material
     u_eq = (
         - 1.043048142343884e+04 * sto**9
         + 4.962669673525584e+04 * sto**8
@@ -261,10 +241,11 @@ def nmc_LGM50_ocp_Chen2020(sto):
         + 13.871365583439971
     )
 
+
     return u_eq
 
 
-def nmc_LGM50_electrolyte_exchange_current_density_Chen2020(c_e, c_s_surf, c_s_max, T):
+def nmc811_exchange_current_density_CircularLIB(c_e, c_s_surf, c_s_max, T):
     """
     Exchange-current density for Butler-Volmer reactions between NMC and LiPF6 in
     EC:DMC.
@@ -292,8 +273,10 @@ def nmc_LGM50_electrolyte_exchange_current_density_Chen2020(c_e, c_s_surf, c_s_m
     :class:`pybamm.Symbol`
         Exchange-current density [A.m-2]
     """
-    m_ref = 3.42e-6  # (A/m2)(m3/mol)**1.5 - includes ref concentrations
-    E_r = 17800
+    k=1.12e-9
+    m_ref = k*pybamm.constants.F/1000**0.5
+    # m_ref = 3.42e-6  # (A/m2)(m3/mol)**1.5 - includes ref concentrations #Chen2020
+    E_r = 17800 # J/mol
     arrhenius = np.exp(E_r / pybamm.constants.R * (1 / 298.15 - 1 / T))
 
     return (
@@ -301,22 +284,22 @@ def nmc_LGM50_electrolyte_exchange_current_density_Chen2020(c_e, c_s_surf, c_s_m
     )
 
 
-def electrolyte_diffusivity_Nyman2008(c_e, T):
+def electrolyte_diffusivity_Landesfeind2019(c_e, T):
     """
     Diffusivity of LiPF6 in EC:EMC (3:7) as a function of ion concentration. The data
     comes from [1]
 
     References
     ----------
-    .. [1] A. Nyman, M. Behm, and G. Lindbergh, "Electrochemical characterisation and
-    modelling of the mass transport phenomena in LiPF6-EC-EMC electrolyte,"
-    Electrochim. Acta, vol. 53, no. 22, pp. 6356–6365, 2008.
+    .. [1] J. Landesfeind, H. A. Gasteiger, "Temperature and Concentration Dependence 
+    of the Ionic Transport Properties of Lithium-Ion Battery Electrolytes,"
+    J. Electrochem. Soc., vol. 166, no. 14, pp. A3079-A3097, 2019.
 
     Parameters
     ----------
-    c_e: :class:`pybamm.Symbol`
+    c_e: :class:`pybamm.Symbol` # input: mol/m**3 - need: mol/L
         Dimensional electrolyte concentration
-    T: :class:`pybamm.Symbol`
+    T: :class:`pybamm.Symbol`   # input: K - need: K
         Dimensional temperature
 
     Returns
@@ -325,29 +308,33 @@ def electrolyte_diffusivity_Nyman2008(c_e, T):
         Solid diffusivity
     """
 
-    D_c_e = 8.794e-11 * (c_e / 1000) ** 2 - 3.972e-10 * (c_e / 1000) + 4.862e-10
+    p1=1.01e3
+    p2=1.01e0
+    p3=-1.56e3
+    p4=-4.87e2
 
-    # Nyman et al. (2008) does not provide temperature dependence
+    c_e_inp=c_e/1000
+    D_c_e = p1 * np.exp(p2*(c_e_inp)) * np.exp(p3/T) * np.exp(p4/T*c_e_inp) + 10e-10 #m/s**2
 
     return D_c_e
 
 
-def electrolyte_conductivity_Nyman2008(c_e, T):
+def electrolyte_conductivity_Landesfeind2019(c_e, T):
     """
     Conductivity of LiPF6 in EC:EMC (3:7) as a function of ion concentration. The data
     comes from [1].
 
     References
     ----------
-    .. [1] A. Nyman, M. Behm, and G. Lindbergh, "Electrochemical characterisation and
-    modelling of the mass transport phenomena in LiPF6-EC-EMC electrolyte,"
-    Electrochim. Acta, vol. 53, no. 22, pp. 6356–6365, 2008.
+    .. [1] J. Landesfeind, H. A. Gasteiger, "Temperature and Concentration Dependence 
+    of the Ionic Transport Properties of Lithium-Ion Battery Electrolytes,"
+    J. Electrochem. Soc., vol. 166, no. 14, pp. A3079-A3097, 2019.
 
     Parameters
     ----------
-    c_e: :class:`pybamm.Symbol`
+    c_e: :class:`pybamm.Symbol` # input: mol/m**3 - need: mol/L
         Dimensional electrolyte concentration
-    T: :class:`pybamm.Symbol`
+    T: :class:`pybamm.Symbol`   # input: K - need: K
         Dimensional temperature
 
     Returns
@@ -355,14 +342,99 @@ def electrolyte_conductivity_Nyman2008(c_e, T):
     :class:`pybamm.Symbol`
         Solid diffusivity
     """
+    p1=5.21e-1
+    p2=2.28e2
+    p3=-1.06e0
+    p4=3.53e-1
+    p5=-3.59e-3
+    p6=1.48e-3
 
+    c_e_inp=c_e/1000
     sigma_e = (
-        0.1297 * (c_e / 1000) ** 3 - 2.51 * (c_e / 1000) ** 1.5 + 3.329 * (c_e / 1000)
-    )
-
-    # Nyman et al. (2008) does not provide temperature dependence
+        p1*(1+(T-p2))*c_e_inp*((1+p3*c_e_inp**0.5 + p4*(1+p5*np.exp(1000/T))*c_e_inp)/(1+c_e_inp**4*(p6*np.exp(1000/T))))*10
+    ) #S/m
 
     return sigma_e
+def electrolyte_thermodynamic_factor_Landesfeind2019(c_e, T):
+    """
+    Thermodynamic factor of LiPF6 in EC:EMC (3:7) as a function of ion concentration. The data
+    comes from [1].
+
+    References
+    ----------
+    .. [1] J. Landesfeind, H. A. Gasteiger, "Temperature and Concentration Dependence 
+    of the Ionic Transport Properties of Lithium-Ion Battery Electrolytes,"
+    J. Electrochem. Soc., vol. 166, no. 14, pp. A3079-A3097, 2019.
+
+    Parameters
+    ----------
+    c_e: :class:`pybamm.Symbol` # input: mol/m**3 - need: mol/L
+        Dimensional electrolyte concentration
+    T: :class:`pybamm.Symbol`   # input: K - need: K
+        Dimensional temperature
+
+    Returns
+    -------
+    :class:`pybamm.Symbol`
+        Solid diffusivity
+    """
+    p1=2.57e1
+    p2=-4.51e1
+    p3=-1.77e-1
+    p4=1.94e0
+    p5=2.95e-1
+    p6=3.08e-4
+    p7=2.59e-1
+    p8=-9.46e-3
+    p9=-4.54e-4
+
+    c_e_inp=c_e/1000
+    TDF = (
+        p1+p2*c_e_inp/1000+p3*T+p4*c_e_inp**2+p5*c_e_inp*T+p6*T**2+p7*c_e_inp**3+p8*c_e_inp**2*T+p9*c_e_inp*T**2
+    )
+
+    return TDF
+
+
+def electrolyte_tansference_number_Landesfeind2019(c_e, T):
+    """
+    Transference number of LiPF6 in EC:EMC (3:7) as a function of ion concentration. The data
+    comes from [1].
+
+    References
+    ----------
+    .. [1] J. Landesfeind, H. A. Gasteiger, "Temperature and Concentration Dependence 
+    of the Ionic Transport Properties of Lithium-Ion Battery Electrolytes,"
+    J. Electrochem. Soc., vol. 166, no. 14, pp. A3079-A3097, 2019.
+
+    Parameters
+    ----------
+    c_e: :class:`pybamm.Symbol` # input: mol/m**3 - need: mol/L
+        Dimensional electrolyte concentration
+    T: :class:`pybamm.Symbol`   # input: K - need: K
+        Dimensional temperature
+
+    Returns
+    -------
+    :class:`pybamm.Symbol`
+        Solid diffusivity
+    """
+    p1=-1.28e1
+    p2=-6.12e0
+    p3=8.21e-2
+    p4=9.04e-1
+    p5=3.18e-2
+    p6=-1.27e-4
+    p7=1.75e-2
+    p8=-3.12e-3
+    p9=-3.96e-5
+
+    c_e_inp=c_e/1000
+    tranfer_number = (
+        p1+p2*c_e_inp/1000+p3*T+p4*c_e_inp**2+p5*c_e_inp*T+p6*T**2+p7*c_e_inp**3+p8*c_e_inp**2*T+p9*c_e_inp*T**2
+    )
+
+    return tranfer_number
 
 
 # Call dict via a function to avoid errors when editing in place
@@ -406,29 +478,29 @@ def get_parameter_values():
 
     return {
         "chemistry": "lithium_ion",
-        # sei
-        "Ratio of lithium moles to SEI moles": 2.0,
-        "Inner SEI reaction proportion": 0.5,
-        "Inner SEI partial molar volume [m3.mol-1]": 9.585e-05,
-        "Outer SEI partial molar volume [m3.mol-1]": 9.585e-05,
-        "SEI reaction exchange current density [A.m-2]": 1.5e-07,
-        "SEI resistivity [Ohm.m]": 200000.0,
-        "Outer SEI solvent diffusivity [m2.s-1]": 2.5000000000000002e-22,
-        "Bulk solvent concentration [mol.m-3]": 2636.0,
-        "Inner SEI open-circuit potential [V]": 0.1,
-        "Outer SEI open-circuit potential [V]": 0.8,
-        "Inner SEI electron conductivity [S.m-1]": 8.95e-14,
-        "Inner SEI lithium interstitial diffusivity [m2.s-1]": 1e-20,
-        "Lithium interstitial reference concentration [mol.m-3]": 15.0,
-        "Initial inner SEI thickness [m]": 2.5e-09,
-        "Initial outer SEI thickness [m]": 2.5e-09,
-        "EC initial concentration in electrolyte [mol.m-3]": 4541.0,
-        "EC diffusivity [m2.s-1]": 2e-18,
-        "SEI kinetic rate constant [m.s-1]": 1e-12,
-        "SEI open-circuit potential [V]": 0.4,
-        "SEI growth activation energy [J.mol-1]": 0.0,
-        "Negative electrode reaction-driven LAM factor [m3.mol-1]": 0.0,
-        "Positive electrode reaction-driven LAM factor [m3.mol-1]": 0.0,
+                # # sei
+                # "Ratio of lithium moles to SEI moles": 2.0,
+                # "Inner SEI reaction proportion": 0.5,
+                # "Inner SEI partial molar volume [m3.mol-1]": 9.585e-05,
+                # "Outer SEI partial molar volume [m3.mol-1]": 9.585e-05,
+                # "SEI reaction exchange current density [A.m-2]": 1.5e-07,
+                # "SEI resistivity [Ohm.m]": 200000.0,
+                # "Outer SEI solvent diffusivity [m2.s-1]": 2.5000000000000002e-22,
+                # "Bulk solvent concentration [mol.m-3]": 2636.0,
+                # "Inner SEI open-circuit potential [V]": 0.1,
+                # "Outer SEI open-circuit potential [V]": 0.8,
+                # "Inner SEI electron conductivity [S.m-1]": 8.95e-14,
+                # "Inner SEI lithium interstitial diffusivity [m2.s-1]": 1e-20,
+                # "Lithium interstitial reference concentration [mol.m-3]": 15.0,
+                # "Initial inner SEI thickness [m]": 2.5e-09,
+                # "Initial outer SEI thickness [m]": 2.5e-09,
+                # "EC initial concentration in electrolyte [mol.m-3]": 4541.0,
+                # "EC diffusivity [m2.s-1]": 2e-18,
+                # "SEI kinetic rate constant [m.s-1]": 1e-12,
+                # "SEI open-circuit potential [V]": 0.4,
+                # "SEI growth activation energy [J.mol-1]": 0.0,
+                # "Negative electrode reaction-driven LAM factor [m3.mol-1]": 0.0,
+                # "Positive electrode reaction-driven LAM factor [m3.mol-1]": 0.0,
         # cell
         "Negative current collector thickness [m]": 1.2e-05,
         "Negative electrode thickness [m]": 8.52e-05,
@@ -464,7 +536,7 @@ def get_parameter_values():
         "Negative electrode charge transfer coefficient": 0.5,
         "Negative electrode double-layer capacity [F.m-2]": 0.2,
         "Negative electrode exchange-current density [A.m-2]"
-        "": graphite_LGM50_electrolyte_exchange_current_density_Chen2020,
+        "": graphite_exchange_current_density_CircularLIB,
         "Negative electrode density [kg.m-3]": 1657.0,
         "Negative electrode specific heat capacity [J.kg-1.K-1]": 700.0,
         "Negative electrode thermal conductivity [W.m-1.K-1]": 1.7,
@@ -482,7 +554,7 @@ def get_parameter_values():
         "Positive electrode charge transfer coefficient": 0.5,
         "Positive electrode double-layer capacity [F.m-2]": 0.2,
         "Positive electrode exchange-current density [A.m-2]"
-        "": nmc_LGM50_electrolyte_exchange_current_density_Chen2020,
+        "": nmc811_exchange_current_density_CircularLIB,
         "Positive electrode density [kg.m-3]": 3262.0,
         "Positive electrode specific heat capacity [J.kg-1.K-1]": 700.0,
         "Positive electrode thermal conductivity [W.m-1.K-1]": 2.1,
@@ -495,10 +567,10 @@ def get_parameter_values():
         "Separator thermal conductivity [W.m-1.K-1]": 0.16,
         # electrolyte
         "Initial concentration in electrolyte [mol.m-3]": 1000.0,
-        "Cation transference number": 0.2594,
-        "Thermodynamic factor": 1.0,
-        "Electrolyte diffusivity [m2.s-1]": electrolyte_diffusivity_Nyman2008,
-        "Electrolyte conductivity [S.m-1]": electrolyte_conductivity_Nyman2008,
+        "Cation transference number": electrolyte_tansference_number_Landesfeind2019,
+        "Thermodynamic factor": electrolyte_thermodynamic_factor_Landesfeind2019,
+        "Electrolyte diffusivity [m2.s-1]": electrolyte_diffusivity_Landesfeind2019,
+        "Electrolyte conductivity [S.m-1]": electrolyte_conductivity_Landesfeind2019,
         # experiment
         "Reference temperature [K]": 298.15,
         "Total heat transfer coefficient [W.m-2.K-1]": 10.0,
@@ -513,7 +585,7 @@ def get_parameter_values():
         "Initial concentration in positive electrode [mol.m-3]": 17038.0,
         "Initial temperature [K]": 298.15,
         # citations
-        "citations": ["Chen2020"],
+        "citations": ["Hebenbrock2025"],
     }
 
 # V_ini_pos=nmc_LGM50_ocp_Chen2020(0.064)
@@ -521,6 +593,6 @@ def get_parameter_values():
 # V_ini_neg=graphite_LGM50_ocp_Chen2020(1)
 # print(V_ini_pos,V_ini_neg)
 
-def load_parameters():
-    """ Load the custom parameter set into PyBaMM """
-    pybamm.ParameterValues.update_from_dict(my_custom_parameters)
+# def load_parameters():
+#     """ Load the custom parameter set into PyBaMM """
+#     pybamm.ParameterValues.update_from_dict(my_custom_parameters)
