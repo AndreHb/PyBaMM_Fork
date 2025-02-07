@@ -1,7 +1,7 @@
 import pybamm
 import numpy as np
 
-def graphite_LGM50_ocp_Chen2020(sto):
+def graphite_PAT_ocp_Hebenbrock2025(sto):
     """
     LG M50 Graphite open-circuit potential as a function of stochiometry, fit taken
     from [1].
@@ -189,7 +189,7 @@ def graphite_exchange_current_density_CircularLIB(
     )
 
 
-def nmc_LGM50_ocp_Chen2020(sto):
+def nmc_PAT_ocp_Hebenbrock2025(sto):
     """
     LG M50 NMC open circuit potential as a function of stochiometry, fit taken
     from [1].
@@ -229,16 +229,16 @@ def nmc_LGM50_ocp_Chen2020(sto):
 
     # CircularLIB Material
     u_eq = (
-        - 1.043048142343884e+04 * sto**9
-        + 4.962669673525584e+04 * sto**8
-        - 1.018714014435327e+05 * sto**7
-        + 1.181473040728662e+05 * sto**6
-        - 8.512801221395213e+04 * sto**5
-        + 3.943050938308326e+04 * sto**4
-        - 1.171024602277544e+04 * sto**3
-        + 2.142589509608000e+03 * sto**2
-        - 2.193442437976997e+02 * sto
-        + 13.871365583439971
+        - 5.798017257680412e+03 * sto**9
+        + 2.968039620195901e+04 * sto**8
+        - 6.560310702104698e+04 * sto**7
+        + 8.200584763157160e+04 * sto**6
+        - 6.376717564701178e+04 * sto**5
+        + 3.192927574244703e+04 * sto**4
+        - 1.027413463767249e+04 * sto**3
+        + 2.043391147685429e+03 * sto**2
+        - 2.283532190326709e+02 * sto
+        + 15.238399371601455
     )
 
 
@@ -520,14 +520,14 @@ def get_parameter_values():
         "Positive current collector specific heat capacity [J.kg-1.K-1]": 897.0,
         "Negative current collector thermal conductivity [W.m-1.K-1]": 401.0,
         "Positive current collector thermal conductivity [W.m-1.K-1]": 237.0,
-        "Nominal cell capacity [A.h]": 5.0,
-        "Current function [A]": 5.0,
+        "Nominal cell capacity [A.h]": 3.0,
+        "Current function [A]": 3.0,
         "Contact resistance [Ohm]": 0,
         # negative electrode
         "Negative electrode conductivity [S.m-1]": 215.0,
         "Maximum concentration in negative electrode [mol.m-3]": 33133.0,
         "Negative electrode diffusivity [m2.s-1]": 3.3e-14,
-        "Negative electrode OCP [V]": graphite_LGM50_ocp_Chen2020,
+        "Negative electrode OCP [V]": graphite_PAT_ocp_Hebenbrock2025,
         "Negative electrode porosity": 0.25,
         "Negative electrode active material volume fraction": 0.75,
         "Negative particle radius [m]": 5.86e-06,
@@ -545,7 +545,7 @@ def get_parameter_values():
         "Positive electrode conductivity [S.m-1]": 0.18,
         "Maximum concentration in positive electrode [mol.m-3]": 63104.0,
         "Positive electrode diffusivity [m2.s-1]": 4e-15, #NMC811_DiffKoeffi_BA_RasmusBewer_Au1, # NMC811_DiffKoeffi_BA_RasmusBewer_Au1, # Chen2020 constant at 4e-15 NMC811_DiffKoeffi_BA_RasmusBewer_Li
-        "Positive electrode OCP [V]": nmc_LGM50_ocp_Chen2020,
+        "Positive electrode OCP [V]": nmc_PAT_ocp_Hebenbrock2025,
         "Positive electrode porosity": 0.335,
         "Positive electrode active material volume fraction": 0.665,
         "Positive particle radius [m]": 5.22e-06,
@@ -585,7 +585,7 @@ def get_parameter_values():
         "Initial concentration in positive electrode [mol.m-3]": 17038.0,
         "Initial temperature [K]": 298.15,
         # citations
-        "citations": ["Hebenbrock2025"],
+        "citations": ["Chen2020"], #change later
     }
 
 # V_ini_pos=nmc_LGM50_ocp_Chen2020(0.064)
