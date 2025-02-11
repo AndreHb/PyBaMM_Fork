@@ -1,7 +1,6 @@
 import pybamm
 import numpy as np
 
-print("Hello")
 def graphite_PAT_ocp_Hebenbrock2025(sto):
     """
     LG M50 Graphite open-circuit potential as a function of stochiometry, fit taken
@@ -44,6 +43,109 @@ def graphite_PAT_ocp_Hebenbrock2025(sto):
     )
 
     return u_eq
+
+def NMC811_DiffKoeffi_BA_RasmusBewer_Li(sto,T):
+    """
+    8th degree polnomial fit for GITT measurement with sucessful parameter determination in SoC range betweenn 10 and 90 %
+    This corresponds to a stochiometric range of the material from [0.142 0.684]
+
+    Retrieved from charge direction of GITT technique.
+
+    Parameters for 3 electrode cell setup with aGr/Li/NMC811
+
+    Parameters
+    ----------
+    sto: :class:`pybamm.Symbol`
+        Electrode stochiometry
+
+    Returns
+    -------
+    :class:`pybamm.Symbol`
+        diffusion coefficient
+    """
+
+    D_Li = (
+        9.698e-11 * sto**8
+        - 3.753e-10 * sto**7
+        + 6.038e-10 * sto**6
+        - 5.255e-10 * sto**5
+        + 2.691e-10 * sto**4
+        - 8.249e-11 * sto**3
+        + 1.468e-11 * sto**2
+        - 1.383e-12 * sto
+        + 5.541e-14
+
+    )
+
+    return D_Li
+
+def NMC811_DiffKoeffi_BA_RasmusBewer_Au1(sto,T):
+    """
+    8th degree polnomial fit for GITT measurement with sucessful parameter determination in SoC range betweenn 10 and 90 %
+
+    Retrieved from charge direction of GITT technique.
+
+    Parameters for 3 electrode cell setup (#1) with aGr/Au(Li)/NMC811
+
+    Parameters
+    ----------
+    sto: :class:`pybamm.Symbol`
+        Electrode stochiometry
+
+    Returns
+    -------
+    :class:`pybamm.Symbol`
+        diffusion coefficient
+    """
+
+    D_Li = (
+        2.755e-10 * sto**8
+        - 9.416e-10 * sto**7
+        + 1.358e-09 * sto**6
+        - 1.074e-09 * sto**5
+        + 5.068e-10 * sto**4
+        - 1.45e-10 * sto**3
+        + 2.44e-11 * sto**2
+        - 2.203e-12 * sto
+        + 8.438e-14
+
+    )
+
+    return D_Li
+
+def NMC811_DiffKoeffi_BA_RasmusBewer_Au2(sto,T):
+    """
+    8th degree polnomial fit for GITT measurement with sucessful parameter determination in SoC range betweenn 10 and 90 %
+
+    Retrieved from charge direction of GITT technique.
+
+    Parameters for 3 electrode cell setup (#2) with aGr/Au(Li)/NMC811
+
+    Parameters
+    ----------
+    sto: :class:`pybamm.Symbol`
+        Electrode stochiometry
+
+    Returns
+    -------
+    :class:`pybamm.Symbol`
+        Open circuit potential
+    """
+
+    D_Li = (
+        6.819e-12 * sto**8
+        - 6.747e-11 * sto**7
+        + 1.48e-10 * sto**6
+        - 1.457e-10 * sto**5
+        + 7.616e-11 * sto**4
+        - 2.203e-11 * sto**3
+        + 3.43e-12 * sto**2
+        - 2.632e-13 * sto
+        + 1.037e-14
+
+    )
+
+    return D_Li
 
 
 def graphite_exchange_current_density_CircularLIB(
@@ -109,6 +211,21 @@ def nmc_PAT_ocp_Hebenbrock2025(sto):
     :class:`pybamm.Symbol`
         Open circuit potential
     """
+
+    # accurate polynomical fit with extrapolation points to limit errors due small extrapolation
+    # x-range: 0.128 to 0.741 - custom cell material
+    # u_eq = (
+    #     - 1.043048142343884e+04 * sto**9
+    #     + 4.962669673525584e+04 * sto**8
+    #     - 1.018714014435327e+05 * sto**7
+    #     + 1.181473040728662e+05 * sto**6
+    #     - 8.512801221395213e+04 * sto**5
+    #     + 3.943050938308326e+04 * sto**4
+    #     - 1.171024602277544e+04 * sto**3
+    #     + 2.142589509608000e+03 * sto**2
+    #     - 2.193442437976997e+02 * sto
+    #     + 13.871365583439971
+    # )
 
     # CircularLIB Material
     u_eq = (
@@ -197,7 +314,7 @@ def electrolyte_diffusivity_Landesfeind2019(c_e, T):
     p4=-4.87e2
 
     c_e_inp=c_e/1000
-    D_c_e = p1 * np.exp(p2*c_e_inp) * np.exp(p3/T) * np.exp(p4/T*c_e_inp) * 10e-11 #m**2/s # corrected from 10e-10 because result was wrong by one order
+    D_c_e = p1 * np.exp(p2*c_e_inp) * np.exp(p3/T) * np.exp(p4/T*c_e_inp) * 10e-10 #m/s**2
 
     return D_c_e
 
@@ -369,21 +486,37 @@ def get_parameter_values():
         "Positive current collector thickness [m]": 1.5e-05, #no value yet
         "Electrode height [m]": 0.065, #limits by positive electrode
         "Electrode width [m]": 0.045*29, #limits by positive electrode
+        # "Cell cooling surface area [m2]": 0.00531,
+        # "Cell volume [m3]": 2.42e-05,
+        # "Cell thermal expansion coefficient [m.K-1]": 1.1e-06,
+        # "Negative current collector conductivity [S.m-1]": 58411000.0,
+        # "Positive current collector conductivity [S.m-1]": 36914000.0,
+        # "Negative current collector density [kg.m-3]": 8960.0,
+        # "Positive current collector density [kg.m-3]": 2700.0,
+        # "Negative current collector specific heat capacity [J.kg-1.K-1]": 385.0,
+        # "Positive current collector specific heat capacity [J.kg-1.K-1]": 897.0,
+        # "Negative current collector thermal conductivity [W.m-1.K-1]": 401.0,
+        # "Positive current collector thermal conductivity [W.m-1.K-1]": 237.0,
         "Nominal cell capacity [A.h]": 3.0,
         "Current function [A]": 3.0,
         "Contact resistance [Ohm]": 0,
         # negative electrode
         "Negative electrode conductivity [S.m-1]": 215.0,
         "Maximum concentration in negative electrode [mol.m-3]": 29871,
-        "Negative electrode diffusivity [m2.s-1]": 6e-14, #changed from e-15 (Rasmus) #now Ecker.2015
+        "Negative electrode diffusivity [m2.s-1]": 2.29e-15,
         "Negative electrode OCP [V]": graphite_PAT_ocp_Hebenbrock2025,
         "Negative electrode porosity": 0.364,
         "Negative electrode active material volume fraction": 0.636*0.94, #mutliplied by active material fraction # seems to be the way it is handeled
-        "Negative particle radius [m]": 1.6e-05, # changed from 1.6e-05
+        "Negative particle radius [m]": 1.6e-05,
         "Negative electrode Bruggeman coefficient (electrolyte)": 1.5,
         "Negative electrode Bruggeman coefficient (electrode)": 0,
+        "Negative electrode charge transfer coefficient": 0.5,
+        # "Negative electrode double-layer capacity [F.m-2]": 0.2,
         "Negative electrode exchange-current density [A.m-2]"
         "": graphite_exchange_current_density_CircularLIB,
+        # "Negative electrode density [kg.m-3]": 1657.0,
+        # "Negative electrode specific heat capacity [J.kg-1.K-1]": 700.0,
+        # "Negative electrode thermal conductivity [W.m-1.K-1]": 1.7,
         "Negative electrode OCP entropic change [V.K-1]": 0.0,
         # positive electrode
         "Positive electrode conductivity [S.m-1]": 0.18,
@@ -392,16 +525,23 @@ def get_parameter_values():
         "Positive electrode OCP [V]": nmc_PAT_ocp_Hebenbrock2025,
         "Positive electrode porosity": 0.4784,
         "Positive electrode active material volume fraction": 0.5216*0.94, #mutliplied by active material fraction # seems to be the way it is handeled
-        "Positive particle radius [m]": 1.0e-05, #changed from 1.1e-5
+        "Positive particle radius [m]": 1.1e-05,
         "Positive electrode Bruggeman coefficient (electrolyte)": 1.5,
         "Positive electrode Bruggeman coefficient (electrode)": 0,
         "Positive electrode charge transfer coefficient": 0.5,
+        # "Positive electrode double-layer capacity [F.m-2]": 0.2,
         "Positive electrode exchange-current density [A.m-2]"
         "": nmc811_exchange_current_density_CircularLIB,
+        # "Positive electrode density [kg.m-3]": 3262.0,
+        # "Positive electrode specific heat capacity [J.kg-1.K-1]": 700.0,
+        # "Positive electrode thermal conductivity [W.m-1.K-1]": 2.1,
         "Positive electrode OCP entropic change [V.K-1]": 0.0,
         # separator
         "Separator porosity": 0.405,
         "Separator Bruggeman coefficient (electrolyte)": 1.5,
+        # "Separator density [kg.m-3]": 397.0,
+        # "Separator specific heat capacity [J.kg-1.K-1]": 700.0,
+        # "Separator thermal conductivity [W.m-1.K-1]": 0.16,
         # electrolyte
         "Initial concentration in electrolyte [mol.m-3]": 1000.0,
         "Cation transference number": electrolyte_tansference_number_Landesfeind2019,
@@ -410,6 +550,7 @@ def get_parameter_values():
         "Electrolyte conductivity [S.m-1]": electrolyte_conductivity_Landesfeind2019,
         # experiment
         "Reference temperature [K]": 298.15,
+        # "Total heat transfer coefficient [W.m-2.K-1]": 10.0,
         "Ambient temperature [K]": 298.15,
         "Number of electrodes connected in parallel to make a cell": 1.0,
         "Number of cells connected in series to make a battery": 1.0,
@@ -417,19 +558,17 @@ def get_parameter_values():
         "Upper voltage cut-off [V]": 4.2,
         "Open-circuit voltage at 0% SOC [V]": 3.0,
         "Open-circuit voltage at 100% SOC [V]": 4.2,
-        "Initial concentration in negative electrode [mol.m-3]": 0.4599*29871*0.9, # calculated based on limiting NMC (s. matlab) 0.4599 ! exception for trying out
-        "Initial concentration in positive electrode [mol.m-3]": 0.548*67116, # calculated based on limiting NMC (s. matlab) 0.5475
+        "Initial concentration in negative electrode [mol.m-3]": 0.9060*29871, # calculated based on limiting NMC (s. matlab) 0.4599 ! exception for trying out
+        "Initial concentration in positive electrode [mol.m-3]": 0.2180*67116, # calculated based on limiting NMC (s. matlab) 0.5475
         "Initial temperature [K]": 298.15,
         # citations
         "citations": ["Chen2020"], #change later
     }
 
+# V_ini_pos=nmc_LGM50_ocp_Chen2020(0.064)
 
-
-V_ini_pos=nmc_PAT_ocp_Hebenbrock2025(0.1980)
-
-V_ini_neg=graphite_PAT_ocp_Hebenbrock2025(0.9060)
-print(V_ini_pos,V_ini_neg)
+# V_ini_neg=graphite_LGM50_ocp_Chen2020(1)
+# print(V_ini_pos,V_ini_neg)
 
 # def load_parameters():
 #     """ Load the custom parameter set into PyBaMM """
