@@ -1,7 +1,13 @@
 import pybamm
 import numpy as np
 
-print("Hello")
+
+# General notes
+# - neg. Diffusion coefficient is not determined by experiments
+# - initial concentration in graphite is reduced to fit general capacity
+#     -- due to oversize of graphite electrode?
+
+
 def graphite_PAT_ocp_Hebenbrock2025(sto):
     """
     LG M50 Graphite open-circuit potential as a function of stochiometry, fit taken
@@ -319,6 +325,95 @@ def electrolyte_tansference_number_Landesfeind2019(c_e, T):
 
     return tranfer_number
 
+# mechanical functions
+
+def graphite_volume_change_Hebenbrock2025(sto):
+    """
+    Graphite particle volume change as a function of stoichiometry [1, 2].
+
+    References
+    ----------
+     .. [1] my publication later
+     .. [2] Schweigler.2018
+
+    Parameters
+    ----------
+    sto: :class:`pybamm.Symbol`
+        Electrode stoichiometry, dimensionless
+        should be R-averaged particle concentration
+    c_s_max : :class:`pybamm.Symbol`
+        Maximum particle concentration [mol.m-3]
+
+    Returns
+    -------
+    t_change:class:`pybamm.Symbol`
+        volume change, dimensionless, normalised by particle volume
+    """
+    p1 = 6.072043947491101
+    p2 = -18.157501114592876
+    p3 = 17.909854335880908
+    p4 = -5.154361101102190
+    p5 = -1.202893481696328
+    p6 = 0.490478992694147
+    p7 = 0.174804039479442
+    p8 = 2.094749135950822e-05
+
+    t_change = (
+        + p1 * sto**7
+        + p2 * sto**6
+        + p3 * sto**5
+        + p4 * sto**4
+        + p5 * sto**3
+        + p6 * sto**2
+        + p7 * sto
+        + p8
+    )
+    return t_change
+
+def NMC811_volume_change_Hebenbrock2025(sto):
+    """
+    Graphite particle volume change as a function of stoichiometry [1, 2].
+
+    References
+    ----------
+     .. [1] my publication later
+     .. [2] deBiasi.2017
+
+    Parameters
+    ----------
+    sto: :class:`pybamm.Symbol`
+        Electrode stoichiometry, dimensionless
+        should be R-averaged particle concentration
+    c_s_max : :class:`pybamm.Symbol`
+        Maximum particle concentration [mol.m-3]
+
+    Returns
+    -------
+    t_change:class:`pybamm.Symbol`
+        volume change, dimensionless, normalised by particle volume
+    """
+    p1 = -31.121753619511804
+    p2 = 1.245316767356756e+02
+    p3 = -2.048773473151045e+02
+    p4 = 1.777066626875889e+02
+    p5 = -86.146925371705780
+    p6 = 22.450624272710403
+    p7 = -2.577259957410042
+    p8 = 0.103828119120282
+
+    t_change = (
+        + p1 * sto**7
+        + p2 * sto**6
+        + p3 * sto**5
+        + p4 * sto**4
+        + p5 * sto**3
+        + p6 * sto**2
+        + p7 * sto
+        + p8
+    )
+    return t_change
+
+
 
 # Call dict via a function to avoid errors when editing in place
 def get_parameter_values():
@@ -368,7 +463,7 @@ def get_parameter_values():
         "Positive electrode thickness [m]": 6.56e-05,
         "Positive current collector thickness [m]": 1.5e-05, #no value yet
         "Electrode height [m]": 0.065, #limits by positive electrode
-        "Electrode width [m]": 0.045*29, #limits by positive electrode
+        "Electrode width [m]": 0.045, #limits by positive electrode
         "Nominal cell capacity [A.h]": 3.0,
         "Current function [A]": 3.0,
         "Contact resistance [Ohm]": 0,
@@ -411,15 +506,27 @@ def get_parameter_values():
         # experiment
         "Reference temperature [K]": 298.15,
         "Ambient temperature [K]": 298.15,
-        "Number of electrodes connected in parallel to make a cell": 1.0,
+        "Number of electrodes connected in parallel to make a cell": 29.0,
         "Number of cells connected in series to make a battery": 1.0,
         "Lower voltage cut-off [V]": 3.0,
         "Upper voltage cut-off [V]": 4.2,
         "Open-circuit voltage at 0% SOC [V]": 3.0,
         "Open-circuit voltage at 100% SOC [V]": 4.2,
-        "Initial concentration in negative electrode [mol.m-3]": 0.4599*29871*0.9, # calculated based on limiting NMC (s. matlab) 0.4599 ! exception for trying out
+        "Initial concentration in negative electrode [mol.m-3]": 0.4599*29871*0.95, # calculated based on limiting NMC (s. matlab) 0.4599 ! exception for trying out
         "Initial concentration in positive electrode [mol.m-3]": 0.548*67116, # calculated based on limiting NMC (s. matlab) 0.5475
         "Initial temperature [K]": 298.15,
+        # mechanical parameters
+        "Negative electrode partial molar volume [m3.mol-1]":3.1e-6, #Laresgoiti.2015
+        "Positive electrode partial molar volume [m3.mol-1]":7.88e-7, # Tu.2024
+        "Negative electrode Poisson's ratio":0.3,#Laresgoiti.2015
+        "Positive electrode Poisson's ratio":0.26,# Tu.2024
+        "Negative electrode Young's modulus [Pa]":1.5e10,#Laresgoiti.2015
+        "Positive electrode Young's modulus [Pa]":1.84e11,# Tu.2024
+        "Negative electrode reference concentration for free of deformation [mol.m-3]":0.0, #taken from Ai2020 Set
+        "Positive electrode reference concentration for free of deformation [mol.m-3]":0.11*67116.0, #adpted to deBiasi2017 set
+        "Negative electrode volume change": graphite_volume_change_Hebenbrock2025, # in [%] based on Fit(sto) from data of Schweidler.2018
+        "Positive electrode volume change": NMC811_volume_change_Hebenbrock2025, # in [%] based on Fit(sto) from data of deBiasi.2018
+        "Cell thermal expansion coefficient [m.K-1]": 1.1e-06, # Rieger.2016c
         # citations
         "citations": ["Chen2020"], #change later
     }
