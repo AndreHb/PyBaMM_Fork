@@ -806,3 +806,14 @@ class ParticleLithiumIonParameters(BaseParameters):
         return pybamm.FunctionParameter(
             f"{self.phase_prefactor}{Domain} electrode Young's modulus [Pa]", inputs
         )
+    #custom parameters from my work
+    def E_ip(self,sto,T):
+        """Dimensional in-plane Young's modulus"""
+        domain, Domain = self.domain_Domain
+        inputs = {
+            f"{self.phase_prefactor} particle stoichiometry": sto,
+            "Temperature [K]": T,
+        }
+        return pybamm.FunctionParameter(
+            f"{self.phase_prefactor}{Domain} electrode in-plane Young's modulus [Pa]", inputs
+        )

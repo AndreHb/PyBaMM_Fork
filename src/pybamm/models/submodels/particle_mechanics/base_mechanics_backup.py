@@ -74,7 +74,6 @@ class BaseMechanics(pybamm.BaseSubModel):
         Omega = pybamm.r_average(phase_param.Omega(sto, T))
 
         E0 = pybamm.r_average(phase_param.E(sto, T))
-        # ECC= #Hier den in-plane Young modul hinzufügen
         nu = phase_param.nu
         # Ai2019 eq [10]
         disp_surf = Omega * R0 / 3 * (c_s_rav - c_0)
