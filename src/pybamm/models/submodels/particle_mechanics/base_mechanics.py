@@ -74,7 +74,6 @@ class BaseMechanics(pybamm.BaseSubModel):
         Omega = pybamm.r_average(phase_param.Omega(sto, T))
 
         E0 = pybamm.r_average(phase_param.E(sto, T))
-        # ECC= #Hier den in-plane Young modul hinzufügen
         nu = phase_param.nu
         # Ai2019 eq [10]
         disp_surf = Omega * R0 / 3 * (c_s_rav - c_0)
@@ -133,15 +132,20 @@ class BaseMechanics(pybamm.BaseSubModel):
         sto = variables[f"{Domain} {phase_name}particle concentration"]
         Omega = pybamm.r_average(phase_param.Omega(sto, T))
 
+        # #self added 
+        # ECC= pybamm.Parameter("Effective in-plane Young modulus [Pa]",domain=domain)
+
         E0 = pybamm.r_average(phase_param.E(sto, T))
         nu = phase_param.nu
         L0 = domain_param.L
         sto_init = pybamm.r_average(phase_param.c_init / phase_param.c_max)
-        v_change = pybamm.x_average(
-            eps_s * phase_param.t_change(sto_rav)
+        t_change = pybamm.x_average(
+            eps_s * phase_param.t_change(sto_rav) # t_change is actually the V(sto) function in the parameters
         ) - pybamm.x_average(eps_s * phase_param.t_change(sto_init))
-
-        electrode_thickness_change = self.param.n_electrodes_parallel * v_change * L0
+        # h_change = ECC/E0*pybamm.x_average(
+        #     eps_s * phase_param.t_change(sto_rav) # t_change is actually the V(sto) function in the parameters
+        # ) - pybamm.x_average(eps_s * phase_param.t_change(sto_init))
+        electrode_thickness_change = self.param.n_electrodes_parallel * t_change * L0
         # Ai2019 eq [10]
         disp_surf = Omega * R0 / 3 * (c_s_rav - c_0)
         # c0 reference concentration for no deformation

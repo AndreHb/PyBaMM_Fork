@@ -1,7 +1,6 @@
 import pybamm
 import numpy as np
 
-
 # General notes
 # - neg. Diffusion coefficient is not determined by experiments
 # - initial concentration in graphite is reduced to fit general capacity
@@ -524,7 +523,7 @@ def get_parameter_values():
         "chemistry": "lithium_ion",
         # cell
         "Negative current collector thickness [m]": 1.0e-05,
-        "Negative electrode thickness [m]": 8.98e-05,
+        "Negative electrode thickness [m]": 8.93e-05,
         "Separator thickness [m]": 2.5e-05,
         "Positive electrode thickness [m]": 6.56e-05,
         "Positive current collector thickness [m]": 1.5e-05, #no value yet
@@ -532,7 +531,7 @@ def get_parameter_values():
         "Electrode width [m]": 0.045, #limits by positive electrode # correction for LLI by making this dimension smaller? % 45 by design?
         "Nominal cell capacity [A.h]": 1.1,
         "Current function [A]": 1.1,
-        "Contact resistance [Ohm]": 0.08,
+        "Contact resistance [Ohm]": 0.09, #0.095
         # negative electrode
         "Negative electrode conductivity [S.m-1]": 1.766e3, #Measurment in BLB
         "Maximum concentration in negative electrode [mol.m-3]": 25667.5,
@@ -578,8 +577,8 @@ def get_parameter_values():
         "Upper voltage cut-off [V]": 4.2,
         "Open-circuit voltage at 0% SOC [V]": 3.0,
         "Open-circuit voltage at 100% SOC [V]": 4.2,
-        "Initial concentration in negative electrode [mol.m-3]": 0.4599*25667, # calculated based on limiting NMC (s. matlab) 0.4599 ! exception for trying out #old: 29871
-        "Initial concentration in positive electrode [mol.m-3]": 0.548*45020, # calculated based on limiting NMC (s. matlab) 0.5475 #old: 67116
+        "Initial concentration in negative electrode [mol.m-3]": 0.4835*25667, # calculated based on limiting NMC (s. matlab) 0.4599 ! exception for trying out #old: 29871 #0.4322
+        "Initial concentration in positive electrode [mol.m-3]": 0.5280*45020, # calculated based on limiting NMC (s. matlab) 0.5475 #old: 67116 #0.6360
         "Initial temperature [K]": 298.15,
         # mechanical parameters
         "Negative electrode partial molar volume [m3.mol-1]":3.1e-6, #Laresgoiti.2015
@@ -599,9 +598,9 @@ def get_parameter_values():
 
 
 
-V_ini_pos=nmc_PAT_ocp_Hebenbrock2025(0.1980)
+V_ini_pos=nmc_PAT_ocp_Hebenbrock2025(0.2095)
 
-V_ini_neg=graphite_PAT_ocp_Hebenbrock2025(0.9060)
+V_ini_neg=graphite_PAT_ocp_Hebenbrock2025(0.92)
 print(V_ini_pos,V_ini_neg)
 test=electrolyte_conductivity_Landesfeind2019(1000,298)
 print(test)
